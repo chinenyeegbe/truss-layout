@@ -46,8 +46,7 @@ class TrussLayout {
 		for(let i = 0; i < numberOfDivs; i++) {
 			let grid = new Grid(parentElem),
 				id = (parentElem.id || 'gridLayout') + this.elementCounter++;
-			grid.setDimensions(config);
-			grid._createDiv(id);
+			grid.setDimensions(config)._createDiv(id)._calculateMaxButton();
 			this.gridList[id] = grid;
 		}
 

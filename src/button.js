@@ -7,13 +7,16 @@ class CircularButton {
 	constructor(_parent, config) {
 		this.parentElement = _parent;
 		this.config = config;
+		this.node = null;
 	}
 
 	_config () {
 		return {
 			'round-button': {
 				width: '30px',
-				position: 'absolute'
+				height: '30px',
+				position: 'absolute',
+				margin: '10px'
 			},
 			'round-button-circle': {
 				width: '100%',
@@ -23,7 +26,8 @@ class CircularButton {
 				border: '2% solid #cfdcec',
 				overflow: 'hidden',
 				background: '#4679BD',
-				boxShadow: '0 0 3px gray'
+				boxShadow: '0 0 3px gray',
+				cursor: 'pointer'
 			},
 			'a': {
 				display: 'block',
@@ -76,9 +80,15 @@ class CircularButton {
 		let config = this.config,
 			position = config.position || {top: 0, left:0},
 			contentConf = config.content,
-			button = this._createButton(contentConf);
+			button = this.node = this._createButton(contentConf);
+		
+		_addStyle(button, position);
 
 		this.parentElement.appendChild(button);
-		_addStyle(button, position);
+		return this;
+	}
+
+	getNode () {
+		return this.node;
 	}
 }

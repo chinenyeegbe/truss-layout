@@ -34,7 +34,7 @@ class Grid {
 
 		this.parentElement && this.parentElement.appendChild(elem);
 		this.node = elem;
-		return elem;
+		return this;
 	}
 
 	removeDiv () {
@@ -45,32 +45,140 @@ class Grid {
 		return this.node;
 	}
 
-	createSplit (split, cb) {
-		let splitLayout = this.splitLayout = new TrussLayout(this.node);
-		splitLayout.createSplit(split, cb);
-	}
 	// return id of the grid
 	getId () {
 		return this.node.id;
 	}
 
-	addButton (contentConf) {
+	render () {
+		
+	}
+
+	_calculateMaxButton () {
+		let oh = this.node.offsetHeight,
+			ow = this.node.offsetWidth,
+			btnSize = 40;
+		
+		this.maxButton || (this.maxButton = {
+			horizontal: Math.floor(ow / btnSize),
+			vertical: Math.floor(oh / btnSize),
+			horizontalCount : 0,
+			verticalCount : 0
+		});
+
+		return this;
+	}
+
+	createSplit (split, cb) {
+		let splitLayout = this.splitLayout = new TrussLayout(this.node);
+		splitLayout.createSplit(split, cb);
+		return this;
+	}
+
+	addButton (contentConf, orientation, events) {
+		let _orientation = orientation.orientation || 'horizontal';
+		if(this.maxButton[_orientation + 'Count'] >= this.maxButton[_orientation]) {
+			return this;
+		}
 		let config = {
-				position: this._getButtonConfig(), 
-				content: contentConf
+				position: this._getButtonConfig(orientation), 
+				content: this._parseContentConfig(contentConf)
 			},
 			id = `${this.getId()}Button${this.buttonCounter}`,
-			btn = this.buttons[id] = new CircularButton(this.getNode(), config);
+			btnInstance = this.buttons[id] = new CircularButton(this.getNode(), config),
+			btn;
 
-		btn.render();
+		btn = btnInstance.render().getNode();
+
+		if(events && Array.isArray(events)) {
+			events.forEach(i => {
+				i.name && i.callback && this._addEvent(btn, i.name, i.callback);
+			});
+		} else if (events && typeof events === 'object') {
+			events.name && events.callback && this._addEvent(btn, events.name, events.callback);
+		}
+		this.maxButton[_orientation + 'Count']++;
+		return btn;
 	}
 
-	render () {
-
+	_addEvent (elem, name, cb) {
+		typeof name === 'string' && typeof cb === 'function' && elem.addEventListener(name, cb);
+		return this;
 	}
 
-	_getButtonConfig() {
-		return {};
+	_parseContentConfig (conf) {
+		let contentConfig = {};
+		switch (typeof conf) {
+			case 'string' : contentConfig.type = 'a'; contentConfig.innerHTML = conf; break;
+			case 'object' : if (conf.text) {
+								contentConfig.type = 'a'; 
+								contentConfig.innerHTML = conf.text;
+							} else if (conf.src) {
+								contentConfig.type = 'img'; 
+								contentConfig.src = conf.src;
+							} else {
+								contentConfig = conf;
+							}
+							break;
+			default : contentConfig.type = 'a'; contentConfig.innerHTML = '';
+		}
+		return contentConfig;
+	}
+
+	_generateOrientationObj () {
+		let i = ['top', 'bottom'],
+			ii = ['left', 'right'],
+			iii = ['horizontal', 'vertical'],
+			ob = {};
+		
+		i.forEach(_i => {
+			ob[_i] = {};
+			ii.forEach(_ii => {
+				ob[_i][_ii] = {};
+				iii.forEach(_iii => {
+					ob[_i][_ii][_iii] = {
+						isModified : false
+					};
+					ob[_i][_ii][_iii][_i] = 0;
+					ob[_i][_ii][_iii][_ii] = 0;
+				});
+			});
+		});
+
+		return ob;
+	}
+
+	_getButtonConfig(or) {
+		let position = or.position,
+			HORIZONTAL = 'horizontal',
+			orientation = or.orientation || HORIZONTAL,
+			str = position.replace(/\s/g, '') || 'top-left', // white spaces removed
+			posArr = str.split('-'),
+			status = this.orientation || (this.orientation = this._generateOrientationObj()),
+			currentPos = {};
+			
+			posArr.forEach((str, index) => {
+				status[str] && posArr.forEach((lr) => {
+					let _posObj = status[str][lr];
+					if(_posObj) {
+						for(let i in _posObj) {
+							if(i === orientation) {
+								currentPos[str] = `${_posObj[i][str]}px`;
+								currentPos[lr] = `${_posObj[i][lr]}px`;
+
+								orientation === HORIZONTAL ? _posObj[i][lr] += 40 : _posObj[i][str] += 40;
+								!_posObj[i]['isModified'] && (_posObj[i]['isModified'] = true);
+							} else {
+								!_posObj[i]['isModified'] && (orientation === HORIZONTAL ? _posObj[i][str] += 40 : _posObj[i][lr] += 40) &&
+								 (_posObj[i]['isModified'] = true);
+							}
+							
+						}
+					}
+				});
+			});
+
+		return currentPos;
 	}
 }
 
