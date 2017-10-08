@@ -107,7 +107,10 @@ class Grid {
 		}
 		return contentConfig;
 	}
-
+	/**
+	 * Generates JSON Schema for button Orientation
+	 * @returns {ob} - JSON object
+	 */
 	_generateOrientationObj () {
 		let i = ['top', 'bottom'],
 			ii = ['left', 'right'],

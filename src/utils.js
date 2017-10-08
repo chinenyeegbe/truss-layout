@@ -13,7 +13,7 @@ function _addStyle (elem, _config) {
 		elem.style[i] = _config[i];
 	}
 	return this;
-}
+};
 
 function _createElement (type) {
 	if (type && typeof type === 'string') {
@@ -21,3 +21,12 @@ function _createElement (type) {
 	}
 	return false;
 };
+
+/**
+* Rounds up a number to two decimal points.
+* @param {Number} d - given number to round up
+* @returns {Number} - rounded up number
+*/ 
+function roundUp (d) {
+   return Math.round(d * 10) / 10;
+}

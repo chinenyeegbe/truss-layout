@@ -33,8 +33,8 @@ class TrussLayout {
 			parentWidth = parentElem.offsetWidth,
 			margin = conf.margin,
 			padding = conf.padding,
-			calculatedHeight = (parentHeight / rows) - (margin * 2),
-			calculatedWidth = (parentWidth / columns) - (margin * 2),
+			calculatedHeight = Math.floor((parentHeight / rows) - (margin * 2)),
+			calculatedWidth =  Math.floor((parentWidth / columns) - (margin * 2)),
 			numberOfDivs = rows * columns,
 			config = {
 				height : `${calculatedHeight}px`,
