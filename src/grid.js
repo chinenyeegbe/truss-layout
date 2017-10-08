@@ -54,21 +54,6 @@ class Grid {
 		
 	}
 
-	_calculateMaxButton () {
-		let oh = this.node.offsetHeight,
-			ow = this.node.offsetWidth,
-			btnSize = 40;
-		
-		this.maxButton || (this.maxButton = {
-			horizontal: Math.floor(ow / btnSize),
-			vertical: Math.floor(oh / btnSize),
-			horizontalCount : 0,
-			verticalCount : 0
-		});
-
-		return this;
-	}
-
 	createSplit (split, cb) {
 		let splitLayout = this.splitLayout = new TrussLayout(this.node);
 		splitLayout.createSplit(split, cb);
@@ -76,8 +61,7 @@ class Grid {
 	}
 
 	addButton (contentConf, orientation, events) {
-		let _orientation = orientation.orientation || 'horizontal';
-		if(this.maxButton[_orientation + 'Count'] >= this.maxButton[_orientation]) {
+		if(!this._canAddButton(orientation)) {
 			return this;
 		}
 		let config = {
@@ -97,7 +81,6 @@ class Grid {
 		} else if (events && typeof events === 'object') {
 			events.name && events.callback && this._addEvent(btn, events.name, events.callback);
 		}
-		this.maxButton[_orientation + 'Count']++;
 		return btn;
 	}
 
@@ -166,11 +149,17 @@ class Grid {
 								currentPos[str] = `${_posObj[i][str]}px`;
 								currentPos[lr] = `${_posObj[i][lr]}px`;
 
-								orientation === HORIZONTAL ? _posObj[i][lr] += 40 : _posObj[i][str] += 40;
+								orientation === HORIZONTAL ? (_posObj[i][lr] += 40, this.maxButton[orientation + 'Count'][str]++) :
+								 (_posObj[i][str] += 40, this.maxButton[orientation + 'Count'][lr]++);
+
 								!_posObj[i]['isModified'] && (_posObj[i]['isModified'] = true);
 							} else {
-								!_posObj[i]['isModified'] && (orientation === HORIZONTAL ? _posObj[i][str] += 40 : _posObj[i][lr] += 40) &&
-								 (_posObj[i]['isModified'] = true);
+								 if(!_posObj[i]['isModified']) {
+									orientation === HORIZONTAL ? (_posObj[i][str] += 40, this.maxButton[orientation + 'Count'][lr]++) : 
+									(_posObj[i][lr] += 40, this.maxButton[orientation + 'Count'][str]++);
+									
+									_posObj[i]['isModified'] = true;
+								 }
 							}
 							
 						}
@@ -179,6 +168,53 @@ class Grid {
 			});
 
 		return currentPos;
+	}
+	/**
+	 * checks the total number of buttons added and returns boolean if any more buttons can be added or not
+	 * @param {object} obj - orientation configaration
+	 * @returns {}
+	 */
+	_canAddButton (obj) {
+		let orientation = `${obj.orientation}Count`,
+			pos = obj.position.replace(/\s/g, ''),
+			posArr = pos.split('-'),
+			currentBtnStatus = this.maxButton || (this.maxButton = this._calculateMaxButton()),
+			position = ((_or, _posArr) => {
+					let _pos = null;
+					if (_or === 'horizontal') {
+						_posArr.forEach(i => {
+							(i === 'top' || i === 'bottom') && (_pos = i);
+						});
+					} else {
+						_posArr.forEach(i => {
+							(i === 'left' || i === 'right') && (_pos = i);
+						});
+					}
+					return _pos;
+				})(obj.orientation, posArr);
+
+			return currentBtnStatus[orientation][position] < this.maxButton[obj.orientation];
+	}
+
+	_calculateMaxButton () {
+		let oh = this.node.offsetHeight,
+			ow = this.node.offsetWidth,
+			btnSize = 40;
+		
+		this.maxButton || (this.maxButton = {
+			horizontal: Math.floor(ow / btnSize),
+			vertical: Math.floor(oh / btnSize),
+			horizontalCount : {
+				top: 1,
+				bottom: 1
+			},
+			verticalCount : {
+				left: 1,
+				right: 1
+			}
+		});
+
+		return this;
 	}
 }
 
