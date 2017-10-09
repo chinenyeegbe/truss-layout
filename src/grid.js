@@ -50,8 +50,46 @@ class Grid {
 		return this.node.id;
 	}
 
-	render () {
+	getContainer (cb) {
+		if(this.chartContainer) {
+			cb && cb.call(null, id);
+			return this.chartContainer;
+		}
+		let buttonStatus = this.maxButton,
+			chartContainer = this.chartContainer = document.createElement('div'),
+			config = {
+				position: 'absolute',
+				background: '#ffffff'
+			},
+			id = `${this.getId()}ChartContainer`,
+			parentElement = this.getNode(),
+			height = parentElement.offsetHeight - 10,
+			width = parentElement.offsetWidth - 10,
+			top = 5,
+			left = 5;
 		
+		buttonStatus.horizontalCount.top > 1 && (top += 40) && (height -= 40);
+		buttonStatus.horizontalCount.bottom > 1 && (height -= 40);
+		buttonStatus.verticalCount.left > 1 && (left += 40) && (width -= 40);
+		buttonStatus.verticalCount.right > 1 && (width -= 40);
+		
+		config.top = `${top}px`;
+		config.left = `${left}px`;
+		config.height = `${height}px`;
+		config.width = `${width}px`;
+		
+		chartContainer.id = id;
+		_addStyle(chartContainer, config);
+		parentElement.appendChild(chartContainer);
+
+		cb && cb.call(null, id);
+
+		return chartContainer;
+	}
+
+	getContainerId () {
+		let id = this.chartContainer ? this.chartContainer.id : this.getContainer().id;
+		return id;
 	}
 
 	createSplit (split, cb) {
