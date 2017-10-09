@@ -65,7 +65,7 @@ class CircularButton {
 		_addStyle(inner, config[conf.type]); //@todo change it as given type
 
 		switch (conf.type) {
-			case 'a' : inner.href = conf.href || '#'; inner.innerHTML = conf.innerHTML || 'TL'; break;
+			case 'a' : inner.href = conf.href || '#'; inner.innerHTML = conf.innerHTML.toUpperCase() || 'TL'; break;
 			case 'img' : inner.src = conf.src || ''; break;
 		}
 

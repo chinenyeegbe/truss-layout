@@ -9,7 +9,7 @@ class Grid {
 		this.buttonCounter = 0;
 	}
 
-	static defaultConfig () {
+	static defaultConfig() {
 		return {
 			background: getRandomColor(),
 			float: 'left',
@@ -17,18 +17,18 @@ class Grid {
 		}
 	}
 
-	_config () {
+	_config() {
 		return Object.assign({}, Grid.defaultConfig(), this.dimensions);
 	}
 
-	setDimensions (_dim) {
+	setDimensions(_dim) {
 		this.dimensions = _dim;
 		return this;
 	}
 
-	_createDiv (id) {
+	_createDiv(id) {
 		let elem = document.createElement('div');
-		
+
 		this.id = elem.id = id;
 		_addStyle(elem, this._config());
 
@@ -37,21 +37,21 @@ class Grid {
 		return this;
 	}
 
-	removeDiv () {
+	removeDiv() {
 
 	}
 
-	getNode () {
+	getNode() {
 		return this.node;
 	}
 
 	// return id of the grid
-	getId () {
+	getId() {
 		return this.node.id;
 	}
 
-	getContainer (cb) {
-		if(this.chartContainer) {
+	getContainer(cb) {
+		if (this.chartContainer) {
 			cb && cb.call(null, id);
 			return this.chartContainer;
 		}
@@ -67,17 +67,17 @@ class Grid {
 			width = parentElement.offsetWidth - 10,
 			top = 5,
 			left = 5;
-		
+
 		buttonStatus.horizontalCount.top > 1 && (top += 40) && (height -= 40);
 		buttonStatus.horizontalCount.bottom > 1 && (height -= 40);
 		buttonStatus.verticalCount.left > 1 && (left += 40) && (width -= 40);
 		buttonStatus.verticalCount.right > 1 && (width -= 40);
-		
+
 		config.top = `${top}px`;
 		config.left = `${left}px`;
 		config.height = `${height}px`;
 		config.width = `${width}px`;
-		
+
 		chartContainer.id = id;
 		_addStyle(chartContainer, config);
 		parentElement.appendChild(chartContainer);
@@ -87,23 +87,29 @@ class Grid {
 		return chartContainer;
 	}
 
-	getContainerId () {
+	getContainerId() {
 		let id = this.chartContainer ? this.chartContainer.id : this.getContainer().id;
 		return id;
 	}
 
-	createSplit (split, cb) {
+	createSplit(split, cb) {
 		let splitLayout = this.splitLayout = new TrussLayout(this.node);
 		splitLayout.createSplit(split, cb);
 		return this;
 	}
 
-	addButton (contentConf, orientation, events) {
-		if(!this._canAddButton(orientation)) {
+	createGoldenSplit(or, cb) {
+		let splitLayout = this.splitLayout = new TrussLayout(this.node);
+		splitLayout.createGoldSplit(or, cb);
+		return this;
+	}
+
+	addButton(contentConf, orientation, events) {
+		if (!this._canAddButton(orientation)) {
 			return this;
 		}
 		let config = {
-				position: this._getButtonConfig(orientation), 
+				position: this._getButtonConfig(orientation),
 				content: this._parseContentConfig(contentConf)
 			},
 			id = `${this.getId()}Button${this.buttonCounter}`,
@@ -112,7 +118,7 @@ class Grid {
 
 		btn = btnInstance.render().getNode();
 
-		if(events && Array.isArray(events)) {
+		if (events && Array.isArray(events)) {
 			events.forEach(i => {
 				i.name && i.callback && this._addEvent(btn, i.name, i.callback);
 			});
@@ -122,26 +128,32 @@ class Grid {
 		return btn;
 	}
 
-	_addEvent (elem, name, cb) {
+	_addEvent(elem, name, cb) {
 		typeof name === 'string' && typeof cb === 'function' && elem.addEventListener(name, cb);
 		return this;
 	}
 
-	_parseContentConfig (conf) {
+	_parseContentConfig(conf) {
 		let contentConfig = {};
 		switch (typeof conf) {
-			case 'string' : contentConfig.type = 'a'; contentConfig.innerHTML = conf; break;
-			case 'object' : if (conf.text) {
-								contentConfig.type = 'a'; 
-								contentConfig.innerHTML = conf.text;
-							} else if (conf.src) {
-								contentConfig.type = 'img'; 
-								contentConfig.src = conf.src;
-							} else {
-								contentConfig = conf;
-							}
-							break;
-			default : contentConfig.type = 'a'; contentConfig.innerHTML = '';
+			case 'string':
+				contentConfig.type = 'a';
+				contentConfig.innerHTML = conf;
+				break;
+			case 'object':
+				if (conf.text) {
+					contentConfig.type = 'a';
+					contentConfig.innerHTML = conf.text;
+				} else if (conf.src) {
+					contentConfig.type = 'img';
+					contentConfig.src = conf.src;
+				} else {
+					contentConfig = conf;
+				}
+				break;
+			default:
+				contentConfig.type = 'a';
+				contentConfig.innerHTML = '';
 		}
 		return contentConfig;
 	}
@@ -149,19 +161,19 @@ class Grid {
 	 * Generates JSON Schema for button Orientation
 	 * @returns {ob} - JSON object
 	 */
-	_generateOrientationObj () {
+	_generateOrientationObj() {
 		let i = ['top', 'bottom'],
 			ii = ['left', 'right'],
 			iii = ['horizontal', 'vertical'],
 			ob = {};
-		
+
 		i.forEach(_i => {
 			ob[_i] = {};
 			ii.forEach(_ii => {
 				ob[_i][_ii] = {};
 				iii.forEach(_iii => {
 					ob[_i][_ii][_iii] = {
-						isModified : false
+						isModified: false
 					};
 					ob[_i][_ii][_iii][_i] = 0;
 					ob[_i][_ii][_iii][_ii] = 0;
@@ -172,41 +184,58 @@ class Grid {
 		return ob;
 	}
 
-	_getButtonConfig(or) {
+	_parsePosition (str) {
+		let position = {
+				'T': 'top',
+				'L': 'left',
+				'R': 'right',
+				'B': 'bottom'
+			},
+			posStr;
+		if(str.length == '2') {
+			posStr = `${position[str[0].toUpperCase()]}-${position[str[1].toUpperCase()]}`;
+		} else {
+			posStr = str.replace(/\s/g, '') || 'top-left'; // white spaces removed
+		}
+
+		return posStr;
+	}
+
+	_getButtonConfig (or) {
 		let position = or.position,
 			HORIZONTAL = 'horizontal',
 			orientation = or.orientation || HORIZONTAL,
-			str = position.replace(/\s/g, '') || 'top-left', // white spaces removed
+			str = this._parsePosition(position),
 			posArr = str.split('-'),
 			status = this.orientation || (this.orientation = this._generateOrientationObj()),
 			currentPos = {};
-			
-			posArr.forEach((str, index) => {
-				status[str] && posArr.forEach((lr) => {
-					let _posObj = status[str][lr];
-					if(_posObj) {
-						for(let i in _posObj) {
-							if(i === orientation) {
-								currentPos[str] = `${_posObj[i][str]}px`;
-								currentPos[lr] = `${_posObj[i][lr]}px`;
 
-								orientation === HORIZONTAL ? (_posObj[i][lr] += 40, this.maxButton[orientation + 'Count'][str]++) :
-								 (_posObj[i][str] += 40, this.maxButton[orientation + 'Count'][lr]++);
+		posArr.forEach((str, index) => {
+			status[str] && posArr.forEach((lr) => {
+				let _posObj = status[str][lr];
+				if (_posObj) {
+					for (let i in _posObj) {
+						if (i === orientation) {
+							currentPos[str] = `${_posObj[i][str]}px`;
+							currentPos[lr] = `${_posObj[i][lr]}px`;
 
-								!_posObj[i]['isModified'] && (_posObj[i]['isModified'] = true);
-							} else {
-								 if(!_posObj[i]['isModified']) {
-									orientation === HORIZONTAL ? (_posObj[i][str] += 40, this.maxButton[orientation + 'Count'][lr]++) : 
+							orientation === HORIZONTAL ? (_posObj[i][lr] += 40, this.maxButton[orientation + 'Count'][str]++) :
+								(_posObj[i][str] += 40, this.maxButton[orientation + 'Count'][lr]++);
+
+							!_posObj[i]['isModified'] && (_posObj[i]['isModified'] = true);
+						} else {
+							if (!_posObj[i]['isModified']) {
+								orientation === HORIZONTAL ? (_posObj[i][str] += 40, this.maxButton[orientation + 'Count'][lr]++) :
 									(_posObj[i][lr] += 40, this.maxButton[orientation + 'Count'][str]++);
-									
-									_posObj[i]['isModified'] = true;
-								 }
+
+								_posObj[i]['isModified'] = true;
 							}
-							
 						}
+
 					}
-				});
+				}
 			});
+		});
 
 		return currentPos;
 	}
@@ -215,41 +244,41 @@ class Grid {
 	 * @param {object} obj - orientation configaration
 	 * @returns {}
 	 */
-	_canAddButton (obj) {
+	_canAddButton(obj) {
 		let orientation = `${obj.orientation}Count`,
-			pos = obj.position.replace(/\s/g, ''),
+			pos = this._parsePosition(obj.position),//obj.position.replace(/\s/g, ''),
 			posArr = pos.split('-'),
 			currentBtnStatus = this.maxButton || (this.maxButton = this._calculateMaxButton()),
 			position = ((_or, _posArr) => {
-					let _pos = null;
-					if (_or === 'horizontal') {
-						_posArr.forEach(i => {
-							(i === 'top' || i === 'bottom') && (_pos = i);
-						});
-					} else {
-						_posArr.forEach(i => {
-							(i === 'left' || i === 'right') && (_pos = i);
-						});
-					}
-					return _pos;
-				})(obj.orientation, posArr);
+				let _pos = null;
+				if (_or === 'horizontal') {
+					_posArr.forEach(i => {
+						(i === 'top' || i === 'bottom') && (_pos = i);
+					});
+				} else {
+					_posArr.forEach(i => {
+						(i === 'left' || i === 'right') && (_pos = i);
+					});
+				}
+				return _pos;
+			})(obj.orientation, posArr);
 
-			return currentBtnStatus[orientation][position] < this.maxButton[obj.orientation];
+		return currentBtnStatus[orientation][position] < this.maxButton[obj.orientation];
 	}
 
-	_calculateMaxButton () {
+	_calculateMaxButton() {
 		let oh = this.node.offsetHeight,
 			ow = this.node.offsetWidth,
 			btnSize = 40;
-		
+
 		this.maxButton || (this.maxButton = {
 			horizontal: Math.floor(ow / btnSize),
 			vertical: Math.floor(oh / btnSize),
-			horizontalCount : {
+			horizontalCount: {
 				top: 1,
 				bottom: 1
 			},
-			verticalCount : {
+			verticalCount: {
 				left: 1,
 				right: 1
 			}

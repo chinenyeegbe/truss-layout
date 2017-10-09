@@ -73,32 +73,41 @@
 	let elem = document.getElementById('board'),
 		grids = new TrussLayout(elem);
 
-	grids.createSplit([2,3], function () {
-		let allGrids = this.gridList,
-			secondLayout = allGrids['board2'],
-			thirdLayout = allGrids['board3'];
+// 	grids.createSplit([2,3], function () {
+// 		let allGrids = this.gridList,
+// 			secondLayout = allGrids['board2'],
+// 			thirdLayout = allGrids['board3'];
 
-		secondLayout.createSplit([3,4], function () {
-			console.log(this);
-			this.gridList['board20'].createSplit([2,1]);
+// 		secondLayout.createSplit([3,4], function () {
+// 			console.log(this);
+// 			this.gridList['board20'].createSplit([2,1]);
+// 		});
+
+// 		thirdLayout.addButton('s',{ position: 'tr', orientation: 'horizontal'});
+// 		thirdLayout.addButton('s',{ position: 'tl', orientation: 'horizontal'});
+// 		thirdLayout.addButton('s',{ position: 'tl', orientation: 'horizontal'});
+// 		thirdLayout.addButton('s',{ position: 'top-left', orientation: 'horizontal'});
+// 		thirdLayout.addButton('m',{ position: 'top-left', orientation: 'horizontal'});
+// 		thirdLayout.addButton('R',{ position: 'top-right', orientation: 'horizontal'});
+// 		thirdLayout.addButton('r',{ position: 'right-top', orientation: 'vertical'});
+// 		thirdLayout.addButton('S',{ position: 'top-left', orientation: 'vertical'});
+// 		thirdLayout.addButton('s',{ position: 'top-left', orientation: 'vertical'});
+// 		thirdLayout.addButton('s',{ position: 'bottom-left', orientation: 'vertical'});
+// 		thirdLayout.addButton('s',{ position: 'bottom-left', orientation: 'vertical'});
+// 		thirdLayout.addButton('s',{ position: 'bottom-right', orientation: 'vertical'});
+// 		thirdLayout.addButton('s',{ position: 'bottom-right', orientation: 'horizontal'});
+
+// 		thirdLayout.getContainerId();
+// 		let con = allGrids['board4'].getContainer();
+// 	});
+
+	grids.createGoldSplit('h', function () {
+		// console.log();
+		this.gridList['board1'].createGoldenSplit('v', function () {
+			this.gridList['board11'].createGoldenSplit('h', function() {
+				this.gridList['board111'].createSplit([3, 1]);
+			});
 		});
-
-		thirdLayout.addButton('s',{ position: 'top-left', orientation: 'horizontal'});
-		thirdLayout.addButton('s',{ position: 'top-left', orientation: 'horizontal'});
-		thirdLayout.addButton('s',{ position: 'top-left', orientation: 'horizontal'});
-		thirdLayout.addButton('s',{ position: 'top-left', orientation: 'horizontal'});
-		thirdLayout.addButton('m',{ position: 'top-left', orientation: 'horizontal'});
-		thirdLayout.addButton('r',{ position: 'top-right', orientation: 'horizontal'});
-		thirdLayout.addButton('r',{ position: 'right-top', orientation: 'vertical'});
-		thirdLayout.addButton('S',{ position: 'top-left', orientation: 'vertical'});
-		thirdLayout.addButton('s',{ position: 'top-left', orientation: 'vertical'});
-		thirdLayout.addButton('s',{ position: 'bottom-left', orientation: 'vertical'});
-		thirdLayout.addButton('s',{ position: 'bottom-left', orientation: 'vertical'});
-		thirdLayout.addButton('s',{ position: 'bottom-right', orientation: 'vertical'});
-		thirdLayout.addButton('s',{ position: 'bottom-right', orientation: 'horizontal'});
-
-		thirdLayout.getContainerId();
-		let con = allGrids['board4'].getContainer();
 	});
-</script>
+	</script>
 </html>
