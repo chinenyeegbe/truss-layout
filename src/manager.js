@@ -47,7 +47,7 @@ class TrussLayout {
 			let grid = new Grid(parentElem),
 				id = (parentElem.id || 'gridLayout') + this.elementCounter++;
 			grid.setDimensions(config)._createDiv(id)._calculateMaxButton();
-			this.gridList[id] = grid;
+			this.gridList[this.elementCounter - 1] = grid;
 		}
 
 		typeof cb === 'function' && cb.call(this, this.gridList);
@@ -76,7 +76,7 @@ class TrussLayout {
 			let grid = new Grid(parentElem),
 				id = (parentElem.id || 'gridLayout') + this.elementCounter++;
 			grid.setDimensions(config)._createDiv(id)._calculateMaxButton();
-			this.gridList[id] = grid;
+			this.gridList[this.elementCounter - 1] = grid;
 		}
 
 		typeof cb === 'function' && cb.call(this, this.gridList);

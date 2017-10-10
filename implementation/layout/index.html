@@ -103,9 +103,26 @@
 
 	grids.createGoldSplit('h', function () {
 		// console.log();
-		this.gridList['board1'].createGoldenSplit('v', function () {
-			this.gridList['board11'].createGoldenSplit('h', function() {
-				this.gridList['board111'].createSplit([3, 1]);
+		this.gridList[0].addButton('x',{ position: 'tr', orientation: 'horizontal'}, {
+			name: 'click',
+			callback: function () {
+				alert('cross button clicked');
+			}
+		});
+		this.gridList[0].addButton('-',{ position: 'tr', orientation: 'horizontal'}, {
+			name: 'click',
+			callback: function () {
+				alert('Minimize button clicked');
+			}
+		});
+		this.gridList[0].addContainer();
+		this.gridList[1].createGoldenSplit('v', function () {
+			this.gridList[1].createGoldenSplit('h', function () {
+				this.gridList[1].createSplit([3, 1], function () {
+					for(let i in this.gridList) {
+						this.gridList[i].createGoldenSplit();
+					}
+				});
 			});
 		});
 	});

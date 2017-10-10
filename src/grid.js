@@ -50,7 +50,7 @@ class Grid {
 		return this.node.id;
 	}
 
-	getContainer(cb) {
+	addContainer(cb) {
 		if (this.chartContainer) {
 			cb && cb.call(null, id);
 			return this.chartContainer;
@@ -88,7 +88,7 @@ class Grid {
 	}
 
 	getContainerId() {
-		let id = this.chartContainer ? this.chartContainer.id : this.getContainer().id;
+		let id = this.chartContainer ? this.chartContainer.id : this.addContainer().id;
 		return id;
 	}
 
@@ -192,7 +192,7 @@ class Grid {
 				'B': 'bottom'
 			},
 			posStr;
-		if(str.length == '2') {
+		if(str && str.length == '2') {
 			posStr = `${position[str[0].toUpperCase()]}-${position[str[1].toUpperCase()]}`;
 		} else {
 			posStr = str.replace(/\s/g, '') || 'top-left'; // white spaces removed

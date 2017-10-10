@@ -23,7 +23,6 @@ class CircularButton {
 				height: 0,
 				paddingBottom: '100%',
 				borderRadius: '50%',
-				border: '2% solid #cfdcec',
 				overflow: 'hidden',
 				background: '#4679BD',
 				boxShadow: '0 0 3px gray',
