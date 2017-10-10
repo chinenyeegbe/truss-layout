@@ -2,10 +2,7 @@
 <html>
 <head>
 	<title>Truss Layout</title>
-	<script type="text/javascript" src="../../src/utils.js"></script>
-	<script type="text/javascript" src="../../src/grid.js"></script>
-	<script type="text/javascript" src="../../src/manager.js"></script>
-	<script type="text/javascript" src="../../src/button.js"></script>
+	<script type="text/javascript" src="../truss.js"></script>
 
 	<style type="text/css" media="screen">
 		* {
@@ -71,7 +68,7 @@
 </body>
 <script type="text/javascript">
 	let elem = document.getElementById('board'),
-		grids = new TrussLayout(elem);
+		grids = new truss.init(elem);
 
 // 	grids.createSplit([2,3], function () {
 // 		let allGrids = this.gridList,

@@ -1,4 +1,4 @@
-// import Grid from './grid.js';
+import Grid from './grid.js';
 
 class TrussLayout {
 	constructor(elem) {
@@ -11,7 +11,7 @@ class TrussLayout {
 		return {
 			margin: 5,
 			padding: 0
-		}
+		};
 	}
 
 	_removeAllGrids() {
@@ -94,4 +94,4 @@ class TrussLayout {
 	}
 }
 
-// export {TrussLayout as default};
+export {TrussLayout as default};

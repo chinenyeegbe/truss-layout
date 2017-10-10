@@ -6,21 +6,21 @@ function getRandomColor () {
 		color += letters[Math.floor(Math.random() * 16)];
 	}
 	return color;
-};
+}
 
 function _addStyle (elem, _config) {
 	for(let i in _config) {
 		elem.style[i] = _config[i];
 	}
 	return this;
-};
+}
 
 function _createElement (type) {
 	if (type && typeof type === 'string') {
 		return document.createElement(type);
 	}
 	return false;
-};
+}
 
 /**
 * Rounds up a number to two decimal points.
@@ -30,3 +30,10 @@ function _createElement (type) {
 function roundUp (d) {
    return Math.round(d * 10) / 10;
 }
+
+export {
+	getRandomColor,
+	_addStyle,
+	_createElement,
+	roundUp
+};

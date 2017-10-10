@@ -1,4 +1,6 @@
-// import TrussLayout from './manager.js';
+import TrussLayout from './manager.js';
+import CircularButton from './button.js';
+import {_addStyle, getRandomColor} from './utils.js' ;
 
 class Grid {
 	constructor(_parent) {
@@ -14,7 +16,7 @@ class Grid {
 			background: getRandomColor(),
 			float: 'left',
 			position: 'relative'
-		}
+		};
 	}
 
 	_config() {
@@ -210,7 +212,7 @@ class Grid {
 			status = this.orientation || (this.orientation = this._generateOrientationObj()),
 			currentPos = {};
 
-		posArr.forEach((str, index) => {
+		posArr.forEach((str) => {
 			status[str] && posArr.forEach((lr) => {
 				let _posObj = status[str][lr];
 				if (_posObj) {
@@ -288,4 +290,4 @@ class Grid {
 	}
 }
 
-// export default Grid;
+export default Grid;

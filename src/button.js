@@ -1,3 +1,4 @@
+import {_addStyle, _createElement} from './utils.js' ;
 class CircularButton {
 	/**
 	 * @constructor
@@ -49,7 +50,7 @@ class CircularButton {
 				padding: '12%',
 				height: 'auto'
 			}
-		}
+		};
 	}
 
 	_createButton (conf) {
@@ -91,3 +92,5 @@ class CircularButton {
 		return this.node;
 	}
 }
+
+export {CircularButton as default};
