@@ -39,8 +39,9 @@ class Grid {
 		return this;
 	}
 
-	removeDiv() {
-
+	remove() {
+		let parentElement = this.node.parentElement;
+		parentElement.removeChild(this.node);
 	}
 
 	getNode() {
@@ -122,10 +123,10 @@ class Grid {
 
 		if (events && Array.isArray(events)) {
 			events.forEach(i => {
-				i.name && i.callback && this._addEvent(btn, i.name, i.callback);
+				i.name && i.callback && this._addEvent(btn, i.name, i.callback.bind(this));
 			});
 		} else if (events && typeof events === 'object') {
-			events.name && events.callback && this._addEvent(btn, events.name, events.callback);
+			events.name && events.callback && this._addEvent(btn, events.name, events.callback.bind(this));
 		}
 		return btn;
 	}

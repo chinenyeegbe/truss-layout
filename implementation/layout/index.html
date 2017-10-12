@@ -103,7 +103,8 @@
 		this.gridList[0].addButton('x',{ position: 'tr', orientation: 'horizontal'}, {
 			name: 'click',
 			callback: function () {
-				alert('cross button clicked');
+				console.log(this);
+				this.remove();
 			}
 		});
 		this.gridList[0].addButton('-',{ position: 'tr', orientation: 'horizontal'}, {
