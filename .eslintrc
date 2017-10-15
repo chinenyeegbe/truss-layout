@@ -22,7 +22,8 @@
         "semi": [
             "error",
             "always"
-        ]
+        ],
+        "no-console": 1
     },
     "parser": "babel-eslint"
   }

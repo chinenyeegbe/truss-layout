@@ -9,6 +9,7 @@ class Grid {
 		this.buttons = {};
 		this.dimensions = {};
 		this.buttonCounter = 0;
+		this.boundingClictDimension = null;
 	}
 
 	static defaultConfig() {
@@ -26,6 +27,24 @@ class Grid {
 	setDimensions(_dim) {
 		this.dimensions = _dim;
 		return this;
+	}
+
+	_setBoundingClintDimension (conf) {
+		this.boundingClictDimension = conf;
+		return this;
+	}
+
+	getBoundingClintDimension () {
+		return this.boundingClictDimension;
+	}
+
+	_setOrientation (v) {
+		this.orientation = v;
+		return this;
+	}
+
+	isVertical () {
+		return this.orientation;
 	}
 
 	_createDiv(id) {
@@ -288,6 +307,95 @@ class Grid {
 		});
 
 		return this;
+	}
+
+	// modifyChild (isVertical, change) {
+	// 	let property = isVertical ? 'width' : 'height',
+	// 		move,
+	// 		orinet = isVertical ? 'vertical' : 'horizontal',
+	// 		layout = this.splitLayout,
+	// 		totalGrids = layout && Object.keys(layout.gridList).length,
+	// 		grid = layout && layout.gridCount[orinet],
+	// 		amount = change / ((grid == 0 && totalGrids > 1) ? 1 : grid),
+	// 		margin = layout && layout.config().margin,
+	// 		changeSliderPos = (_slider, ob, i) => {
+	// 			let sliderNode = _slider.slider,
+	// 				sliderDim  = sliderNode.getBoundingClientRect(),
+	// 				pos = ob[property] + amount;
+
+	// 			if (!_slider.isVertical) { // change width
+	// 				move = isVertical ? 'width' : 'top';
+	// 				sliderNode.style[move] = isVertical ? ((sliderDim[move] + amount) + 'px') : ((sliderDim[move] - ob[move])* (Number(i)+1) + amount + margin)+'px';// (((ob[property] * (Number(i)+1)) + amount) + 'px');
+	// 			} else { // change left position
+	// 				move = isVertical ? 'left' : 'height';
+	// 				sliderNode.style[move] = isVertical ? ((pos + margin) + 'px') : ((amount + sliderDim[move]) + 'px'); // add margin
+	// 			}
+	// 		};
+
+	// 	if(totalGrids) {
+	// 		let childGrids = layout.gridList,
+	// 			sliders = layout.slider;
+	// 		for(let key in childGrids) {
+	// 			if(childGrids.hasOwnProperty(key)) {
+	// 				let node = childGrids[key].getNode(),
+	// 					dim = node.getBoundingClientRect();
+	// 				node.style[property] = (dim[property] + amount) + 'px';
+	// 				sliders[key] && changeSliderPos(sliders[key], dim, key);
+	// 				childGrids[key].modifyChild(isVertical, amount);
+	// 			}
+	// 		}
+	// 	}
+	// }
+
+	// resizes parent and child components
+	resizeInnerContainers (isvertical, change, operation) {
+		let layout = this.splitLayout,
+			childContainers = layout && layout.gridList,
+			sliders = layout && layout.slider,
+			property = isvertical ? 'width' : 'height',
+			count = isvertical ? 'columns' : 'rows',
+			conf = layout && layout.gridCount,
+			n = (conf && conf[count]) || 1,
+			amount = change / n,
+			elem = this.getNode(),
+			dataConf = elem.getBoundingClientRect();
+		
+		// first change own dimension (width / height);
+		elem.style[property] = (operation ? (dataConf[property] + change) : (dataConf[property] - change)) + 'px';
+
+		if(!childContainers) {
+			return this;
+		}
+		
+		for(let key in childContainers) {
+			if(childContainers.hasOwnProperty(key)) {
+				childContainers[key].resizeInnerContainers(isvertical, amount, 1);
+			}
+		}
+
+		if(!sliders) {
+			return this;
+		}
+
+		for(let key in sliders) {
+			if(sliders.hasOwnProperty(key)) {
+				this.changeSliderDimension(sliders[key], isvertical, amount, key);
+			}
+		}
+
+		return this;
+	}
+
+	changeSliderDimension (sliderObj, isVertical, amount, key) {
+		let node = sliderObj.slider,
+			isVerticalSlider = sliderObj.isVertical,
+			property = isVertical ? (isVerticalSlider ? 'left' : 'width') : (isVerticalSlider ? 'height' : 'top'),
+			actualAmount = (Number(key)+1)*amount,
+			calculatedAmount = parseFloat(node.style[property]) + actualAmount;
+
+		property === 'left' && sliderObj.currX && (sliderObj.currX = calculatedAmount);
+		property === 'top' && sliderObj.currY && (sliderObj.currY = calculatedAmount);
+		node.style[property] = calculatedAmount + 'px';
 	}
 }
 
