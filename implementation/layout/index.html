@@ -118,7 +118,8 @@
 			this.gridList[1].createGoldenSplit('h', function () {
 				this.gridList[1].createSplit([3, 1], function () {
 					for(let i in this.gridList) {
-						this.gridList[i].createGoldenSplit();
+						// this.gridList[i].createGoldenSplit();
+						this.gridList[i].createSplit([2, 2]);
 					}
 				});
 			});

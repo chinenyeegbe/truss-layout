@@ -17,7 +17,7 @@ class Grid {
 
 	static defaultConfig() {
 		return {
-			background: getRandomColor(),
+			background: '#cccccc',
 			float: 'left',
 			position: 'relative'
 		};
@@ -110,6 +110,39 @@ class Grid {
 		cb && cb.call(null, id);
 
 		return chartContainer;
+	}
+
+	_getContainerDimension () {
+		if(!this.chartContainer) {
+			return {};
+		}
+		let buttonStatus = this.maxButton,
+			parentElement = this.getNode(),
+			height = parentElement.offsetHeight - 10,
+			width = parentElement.offsetWidth - 10,
+			top = 5,
+			left = 5,
+			config = {};
+
+		buttonStatus.horizontalCount.top > 1 && (top += 40) && (height -= 40);
+		buttonStatus.horizontalCount.bottom > 1 && (height -= 40);
+		buttonStatus.verticalCount.left > 1 && (left += 40) && (width -= 40);
+		buttonStatus.verticalCount.right > 1 && (width -= 40);
+
+		config.top = `${top}px`;
+		config.left = `${left}px`;
+		config.height = `${height}px`;
+		config.width = `${width}px`;
+
+		return config;
+	}
+
+	resizeContainer () {
+		if(!this.chartContainer) {
+			return null;
+		}
+		
+		_addStyle(this.chartContainer, this._getContainerDimension());
 	}
 
 	getContainerId() {
@@ -327,6 +360,7 @@ class Grid {
 
 		// first change own dimension (width / height);
 		elem.style[property] = (operation ? (dataConf[property] + change) : (dataConf[property] - change)) + 'px';
+		this.resizeContainer();
 
 		if (!childContainers) {
 			return this;
@@ -343,23 +377,36 @@ class Grid {
 		if (!sliders) {
 			return this;
 		}
-
+		
 		for (let key in sliders) {
 			if (sliders.hasOwnProperty(key)) {
-				this.changeSliderDimension(sliders[key], isvertical, amount, key, op);
+				this.changeSliderDimension(sliders[key], isvertical, amount, key, op, conf);
 			}
 		}
 
 		return this;
 	}
 
-	changeSliderDimension(sliderObj, isVertical, amount, key, op) {
+	changeSliderDimension(sliderObj, isVertical, amount, key, op, conf) {
 		let node = sliderObj.slider,
 			isVerticalSlider = sliderObj.isVertical,
+			numberOfCells = isVerticalSlider ? conf['rows']: conf['columns'],
 			property = isVertical ? (isVerticalSlider ? 'left' : 'width') : (isVerticalSlider ? 'height' : 'top'),
-			actualAmount = (Number(key) + 1) * amount,
-			calculatedAmount = parseFloat(node.style[property]) + (op ? actualAmount : (actualAmount * -1));
+			actualAmount,
+			calculatedAmount;
 
+		if(property === 'width') {
+			actualAmount =  amount * numberOfCells;
+		} else if (property === 'left') {
+			let ic = Math.abs(conf['columns'] - 2 - Number(key)) + 1;
+			actualAmount = amount * ic;
+		} else if (property === 'height') {
+			actualAmount =  amount * numberOfCells;
+		} else {
+			actualAmount = (Number(key) + 1) * amount;
+		}
+		calculatedAmount = parseFloat(node.style[property]) + (op ? actualAmount : (actualAmount * -1));
+		
 		property === 'left' && sliderObj.currX && (sliderObj.currX = calculatedAmount);
 		property === 'top' && sliderObj.currY && (sliderObj.currY = calculatedAmount);
 		
@@ -368,42 +415,3 @@ class Grid {
 }
 
 export default Grid;
-
-
-// modifyChild (isVertical, change) {
-// 	let property = isVertical ? 'width' : 'height',
-// 		move,
-// 		orinet = isVertical ? 'vertical' : 'horizontal',
-// 		layout = this.splitLayout,
-// 		totalGrids = layout && Object.keys(layout.gridList).length,
-// 		grid = layout && layout.gridCount[orinet],
-// 		amount = change / ((grid == 0 && totalGrids > 1) ? 1 : grid),
-// 		margin = layout && layout.config().margin,
-// 		changeSliderPos = (_slider, ob, i) => {
-// 			let sliderNode = _slider.slider,
-// 				sliderDim  = sliderNode.getBoundingClientRect(),
-// 				pos = ob[property] + amount;
-
-// 			if (!_slider.isVertical) { // change width
-// 				move = isVertical ? 'width' : 'top';
-// 				sliderNode.style[move] = isVertical ? ((sliderDim[move] + amount) + 'px') : ((sliderDim[move] - ob[move])* (Number(i)+1) + amount + margin)+'px';// (((ob[property] * (Number(i)+1)) + amount) + 'px');
-// 			} else { // change left position
-// 				move = isVertical ? 'left' : 'height';
-// 				sliderNode.style[move] = isVertical ? ((pos + margin) + 'px') : ((amount + sliderDim[move]) + 'px'); // add margin
-// 			}
-// 		};
-
-// 	if(totalGrids) {
-// 		let childGrids = layout.gridList,
-// 			sliders = layout.slider;
-// 		for(let key in childGrids) {
-// 			if(childGrids.hasOwnProperty(key)) {
-// 				let node = childGrids[key].getNode(),
-// 					dim = node.getBoundingClientRect();
-// 				node.style[property] = (dim[property] + amount) + 'px';
-// 				sliders[key] && changeSliderPos(sliders[key], dim, key);
-// 				childGrids[key].modifyChild(isVertical, amount);
-// 			}
-// 		}
-// 	}
-// }

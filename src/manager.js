@@ -153,6 +153,7 @@ class TrussLayout {
 				config.left = `${margin}px`;
 				config.height = `${sliderHeight}px`;
 				config.width = `${sliderWidth}px`;
+				config.background = '#faebd7';
 				config.zIndex = 10;
 
 				let elem = _createElement('div'),
@@ -173,12 +174,12 @@ class TrussLayout {
 				let sliderProps = slider[len];
 
 				elem.addEventListener('mouseover', function () {
-					this.style.background = '#000000';
+					this.style.background = '#dbc28c';
 					this.style.cursor = 'ns-resize';
 					this.style.zIndex = parseInt(this.style.zIndex) + 1;
 				});
 				elem.addEventListener('mouseout', function () {
-					!sliderProps.isSelected && (this.style.background = '#ffffff');
+					!sliderProps.isSelected && (this.style.background = '#faebd7');
 				});
 				elem.addEventListener('mousedown', function (e) {
 					sliderProps.isSelected = true;
@@ -215,6 +216,7 @@ class TrussLayout {
 				config.left = `${left}px`;
 				config.height = `${sliderHeight}px`;
 				config.width = `${sliderWidth}px`;
+				config.background = `#faebd7`;
 				
 				let elem = _createElement('div'),
 					id = `${i}`,
@@ -234,12 +236,12 @@ class TrussLayout {
 				sliderProps = slider[len];
 
 				elem.addEventListener('mouseover', function() {
-					this.style.background = '#000000';
+					this.style.background = '#dbc28c';
 					this.style.cursor = 'ew-resize';
 					this.style.zIndex += 1;
 				});
 				elem.addEventListener('mouseout', function () {
-					!sliderProps.isSelected && (this.style.background = '#ffffff');
+					!sliderProps.isSelected && (this.style.background = '#faebd7');
 				});
 				elem.addEventListener('mousedown', function (e) {
 					sliderProps.isSelected = true;
@@ -284,8 +286,6 @@ class TrussLayout {
 				item2;
 
 			if(count > 1 && !isVertical) {
-				// k1 = (i + j) - 1;
-				// k2 = k1 + count;
 				let startingPoint = count * (i - 1);
 				k1 = startingPoint + j;
 				k2 = startingPoint + j + count;

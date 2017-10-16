@@ -76,8 +76,7 @@
 			thirdLayout = allGrids[2];
 
 		secondLayout.createSplit([3,4], function () {
-			console.log(this);
-			this.gridList['3'].createSplit([2,1]);
+			this.gridList['3'].createSplit([3,1]);
 		});
 
 		thirdLayout.addButton('s',{ position: 'tr', orientation: 'horizontal'});
