@@ -17,7 +17,7 @@ class Grid {
 
 	static defaultConfig() {
 		return {
-			background: '#cccccc',
+			background: '#adc8d6',
 			float: 'left',
 			position: 'relative'
 		};
@@ -366,7 +366,7 @@ class Grid {
 			return this;
 		}
 
-		let op = property === 'height' ? operation : 1;
+		let op = ((property === 'height') || (property === 'width' )) ? operation : 1;
 
 		for (let key in childContainers) {
 			if (childContainers.hasOwnProperty(key)) {

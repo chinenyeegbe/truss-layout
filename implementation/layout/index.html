@@ -104,7 +104,7 @@
 			name: 'click',
 			callback: function () {
 				console.log(this);
-				this.remove();
+				//this.remove();
 			}
 		});
 		this.gridList[0].addButton('-',{ position: 'tr', orientation: 'horizontal'}, {
@@ -118,11 +118,15 @@
 			this.gridList[1].createGoldenSplit('h', function () {
 				this.gridList[1].createSplit([3, 1], function () {
 					for(let i in this.gridList) {
-						// this.gridList[i].createGoldenSplit();
-						this.gridList[i].createSplit([2, 2]);
+						this.gridList[i].createGoldenSplit('h', function () {
+							this.gridList[0].addContainer();
+							this.gridList[1].addContainer();
+						});
 					}
 				});
+				this.gridList[0].addContainer();
 			});
+			this.gridList[0].addContainer();
 		});
 	});
 	</script>
