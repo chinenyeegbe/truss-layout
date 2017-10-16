@@ -153,6 +153,7 @@ class TrussLayout {
 				config.left = `${margin}px`;
 				config.height = `${sliderHeight}px`;
 				config.width = `${sliderWidth}px`;
+				config.zIndex = 10;
 
 				let elem = _createElement('div'),
 					id = `${i}`,
@@ -174,7 +175,7 @@ class TrussLayout {
 				elem.addEventListener('mouseover', function () {
 					this.style.background = '#000000';
 					this.style.cursor = 'ns-resize';
-					this.style.zIndex += 1;
+					this.style.zIndex = parseInt(this.style.zIndex) + 1;
 				});
 				elem.addEventListener('mouseout', function () {
 					!sliderProps.isSelected && (this.style.background = '#ffffff');
@@ -182,7 +183,6 @@ class TrussLayout {
 				elem.addEventListener('mousedown', function (e) {
 					sliderProps.isSelected = true;
 					sliderProps.y = e.clientY - parseInt(elem.offsetTop);
-
 				});
 				elem.addEventListener('mouseup', function () {
 					sliderProps.isSelected = false;
@@ -206,13 +206,16 @@ class TrussLayout {
 
 			for (let i = 1; i < c; i++) {
 				let startWidth = (Array.isArray(cw) ? cw[i - 1] - margin : cw),
-					left = ((startWidth * i) + (sliderHeight * (i - 1)));
-
+					left = ((startWidth * i) + (sliderWidth * (i - 1)));
+				/* @todo: below line is done as non-gold layout margin is not add
+					add margin value at time of creation */
+				!Array.isArray(cw) && (left += margin);
+				// the above line
 				config.top = `${margin}px`;
 				config.left = `${left}px`;
 				config.height = `${sliderHeight}px`;
 				config.width = `${sliderWidth}px`;
-
+				
 				let elem = _createElement('div'),
 					id = `${i}`,
 					len = slider.length,
@@ -257,6 +260,7 @@ class TrussLayout {
 				self.parent.appendChild(elem);
 			}
 		}
+		return slider;
 	}
 
 	_resize(change, i, isVertical) {
