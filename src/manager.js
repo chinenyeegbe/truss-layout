@@ -260,16 +260,47 @@ class TrussLayout {
 	}
 
 	_resize(change, i, isVertical) {
-		let item1 = this.gridList[i - 1],
-			item2 = this.gridList[i];
-
-		if (isVertical) { //move left
-			item1.resizeInnerContainers(isVertical, change, 0); // change 
-			item2.resizeInnerContainers(isVertical, change, 1);
+		let gridCount = this.gridCount,
+			list = this.gridList,
+			count = 0,
+			c = 0;
+		
+		if(isVertical) {
+			count =  gridCount['rows'];
+			c = gridCount['columns'];
 		} else {
-			item1.resizeInnerContainers(isVertical, change, 0);
-			item2.resizeInnerContainers(isVertical, change, 1);
+			c =  gridCount['rows'];
+			count = gridCount['columns'];
 		}
+
+		for(let j = 0; j < count; j++) {
+			let k1,
+				k2,
+				item1,
+				item2;
+
+			if(count > 1 && !isVertical) {
+				// k1 = (i + j) - 1;
+				// k2 = k1 + count;
+				let startingPoint = count * (i - 1);
+				k1 = startingPoint + j;
+				k2 = startingPoint + j + count;
+			} else {
+				k2 = (i + (j * c)),
+				k1 = k2 - 1;
+			}
+			
+			item1 = list[k1],
+			item2 = list[k2];
+
+			if (isVertical) { //move left
+				item1.resizeInnerContainers(isVertical, change, 0); // change 
+				item2.resizeInnerContainers(isVertical, change, 1);
+			} else {
+				item1.resizeInnerContainers(isVertical, change, 0);
+				item2.resizeInnerContainers(isVertical, change, 1);
+			}
+		}		
 	}
 }
 
