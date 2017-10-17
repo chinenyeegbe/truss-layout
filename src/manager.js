@@ -1,7 +1,8 @@
 import Grid from './grid.js';
 import {
 	_createElement,
-	_addStyle
+	_addStyle,
+	roundUp
 } from './utils';
 
 class TrussLayout {
@@ -20,6 +21,54 @@ class TrussLayout {
 			margin: 5,
 			padding: 0
 		};
+	}
+
+	resizeLayout (heightChange, widthChange) {
+		let rows = this.gridCount.rows,
+			cols = this.gridCount.columns,
+			ch = roundUp(heightChange / rows),
+			cw = roundUp(widthChange / cols),
+			list = this.gridList,
+			conf = this.gridCount;
+
+		for (let i = 0, ii = this.slider.length; i < ii; i++) {
+			let _slider = this.slider[i],
+				isVertical = _slider.isVertical,
+				elem = _slider.slider;
+			
+			if (isVertical) {
+				let ic = (Math.abs(conf['columns'] - 2 - Number(i)) + 1),
+					left = cw * ic;
+				left = (parseFloat(elem.style.left) + left);
+				// logic for changinf the left position
+				elem.style.left = left + 'px';
+				// logic for changing the height
+				elem.style.height = (parseFloat(elem.style.height) + heightChange) + 'px';
+				// changing slider current position
+				_slider.currX && (_slider.currX = left);
+			} else {
+				let numberOfCells = isVertical ? conf['rows']: conf['columns'];
+				// logic for changing the top
+				let top =  ch + ch * i;
+				top = (parseFloat(elem.style.top) + top);
+				elem.style.top = top + 'px';
+				// changing the current top position of the slider
+				_slider.currY && (_slider.currY = top);
+				// LOGIC for changing the width
+				let width =  cw * numberOfCells;
+				elem.style.width = (parseFloat(elem.style.width) + width) + 'px';
+			}
+		}
+		
+		for(let i in list) {
+			let node = list[i].getNode(),
+				layout = list[i].splitLayout;
+			
+			node.style.height = (parseFloat(node.style.height) + ch) + 'px';
+			node.style.width = (parseFloat(node.style.width) + cw) + 'px';
+			list[i].resizeContainer();
+			layout && layout.resizeLayout(ch, cw);
+		}
 	}
 
 	_removeAllGrids() {
@@ -55,14 +104,6 @@ class TrussLayout {
 			let grid = new Grid(parentElem),
 				id = (parentElem.id || 'gridLayout') + this.elementCounter++;
 			grid.setDimensions(config)._createDiv(id)._calculateMaxButton();
-			grid._setBoundingClintDimension({
-				height: calculatedHeight,
-				width: calculatedWidth,
-				parentHeight: parentHeight,
-				parentWidth: parentWidth,
-				rows: rows,
-				columns: columns
-			})._setOrientation('horizontal');
 
 			this.gridCount['horizontal']++;
 			this.gridList[this.elementCounter - 1] = grid;
@@ -216,7 +257,7 @@ class TrussLayout {
 				config.left = `${left}px`;
 				config.height = `${sliderHeight}px`;
 				config.width = `${sliderWidth}px`;
-				config.background = `#faebd7`;
+				config.background = '#faebd7';
 				
 				let elem = _createElement('div'),
 					id = `${i}`,

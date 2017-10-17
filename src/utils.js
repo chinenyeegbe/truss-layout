@@ -28,7 +28,7 @@ function _createElement (type) {
 * @returns {Number} - rounded up number
 */ 
 function roundUp (d) {
-   return Math.round(d * 10) / 10;
+   return Math.round(d * 100) / 100;
 }
 
 export {

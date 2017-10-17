@@ -1,8 +1,7 @@
 import TrussLayout from './manager.js';
 import CircularButton from './button.js';
 import {
-	_addStyle,
-	getRandomColor
+	_addStyle
 } from './utils.js';
 
 class Grid {
