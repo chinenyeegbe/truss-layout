@@ -49,12 +49,21 @@ class CircularButton {
 				width: '76%',
 				padding: '12%',
 				height: 'auto'
+			},
+			'div' : {
+				display: 'block',
+				width: '30px',
+				height: '30px'
 			}
 		};
 	}
 
 	_createButton (conf) {
-		!conf.type && (conf.type = 'a');
+		if(!conf.type) {
+			conf.type = 'a';
+		} else if (conf.type === 'svg') {
+			conf.type = 'div';
+		}
 		let outer = _createElement('div'),
 			middle = _createElement('div'),
 			inner = _createElement(conf.type), // depends on the content
@@ -67,6 +76,7 @@ class CircularButton {
 		switch (conf.type) {
 			case 'a' : inner.href = conf.href || '#'; inner.innerHTML = conf.innerHTML.toUpperCase() || 'TL'; break;
 			case 'img' : inner.src = conf.src || ''; break;
+			case 'div' : inner.innerHTML = conf.html || ''; break;
 		}
 
 		outer.appendChild(middle);
