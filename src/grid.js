@@ -158,7 +158,7 @@ class Grid {
 
 	createGoldenSplit(or, cb) {
 		let splitLayout = this.splitLayout = new TrussLayout(this.node);
-		this.root && (splitLayout.parentManager = this.root);
+		this.root && (splitLayout.parentManager = this.root, splitLayout.index = this.index);
 		splitLayout.createGoldSplit(or, cb);
 		return this;
 	}

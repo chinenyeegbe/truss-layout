@@ -121,17 +121,17 @@ class TrussLayout {
 				return {
 					x: parentConf.wMax,
 					y: parentConf.hSum
-				}
+				};
 			} else if (rows === 1 && cols > 1) {
 				return {
 					x: parentConf.wSum,
 					y: parentConf.hMax
-				}
+				};
 			} else {
 				return {
 					x: parentConf.wSum,
 					y: parentConf.hSum
-				}
+				};
 			}
 		}
 		return move;
@@ -209,18 +209,16 @@ class TrussLayout {
 			wMax: parentHeight / 2,
 			wSum: parentWidth / 2
 		};
-
+		this.setDraggableDimension(parentHeight/2, parentWidth/2, rows, columns);
 		for (let i = 0; i < 2; i++) {
-			let h,
-				w;
-			h = config.height = `${Array.isArray(calculatedHeight) ? (calculatedHeight[i] - (margin * 2.1)) : calculatedHeight}px`;
-			w = config.width = `${Array.isArray(calculatedWidth) ? (calculatedWidth[i] - (margin * 2.1)) : calculatedWidth}px`;
+			config.height = `${Array.isArray(calculatedHeight) ? (calculatedHeight[i] - (margin * 2.1)) : calculatedHeight}px`;
+			config.width = `${Array.isArray(calculatedWidth) ? (calculatedWidth[i] - (margin * 2.1)) : calculatedWidth}px`;
 
 			let grid = new Grid(parentElem),
 				id = (parentElem.id || 'gridLayout') + this.elementCounter++;
 			grid.setDimensions(config)._createDiv(id)._calculateMaxButton();
 			grid.root = this;
-
+			grid.index = this.elementCounter - 1;
 			this.gridList[this.elementCounter - 1] = grid;
 		}
 
