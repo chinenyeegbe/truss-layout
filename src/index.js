@@ -1,19 +1,19 @@
 import TrussLayout from './manager.js';
 let layout = (function () {
-    var attachEvent = document.attachEvent;
-    var isIE = navigator.userAgent.match(/Trident/);
-    var requestFrame = (function () {
-        var raf = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame ||
-            function (fn) {
-                return window.setTimeout(fn, 20);
+    let attachEvent = document.attachEvent,
+        isIE = navigator.userAgent.match(/Trident/),
+        requestFrame = (function () {
+            let raf = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame ||
+                function (fn) {
+                    return window.setTimeout(fn, 60);
+                };
+            return function (fn) {
+                return raf(fn);
             };
-        return function (fn) {
-            return raf(fn);
-        };
-    })();
+        })();
 
-    var cancelFrame = (function () {
-        var cancel = window.cancelAnimationFrame || window.mozCancelAnimationFrame || window.webkitCancelAnimationFrame ||
+    let cancelFrame = (function () {
+        let cancel = window.cancelAnimationFrame || window.mozCancelAnimationFrame || window.webkitCancelAnimationFrame ||
             window.clearTimeout;
         return function (id) {
             return cancel(id);
@@ -21,10 +21,10 @@ let layout = (function () {
     })();
 
     function resizeListener(e) {
-        var win = e.target || e.srcElement;
+        let win = e.target || e.srcElement;
         if (win.__resizeRAF__) cancelFrame(win.__resizeRAF__);
         win.__resizeRAF__ = requestFrame(function () {
-            var trigger = win.__resizeTrigger__;
+            let trigger = win.__resizeTrigger__;
             trigger.__resizeListeners__.forEach(function (fn) {
                 fn.call(trigger, e);
             });
@@ -44,7 +44,7 @@ let layout = (function () {
                 element.attachEvent('onresize', resizeListener);
             } else {
                 if (getComputedStyle(element).position == 'static') element.style.position = 'relative';
-                var obj = element.__resizeTrigger__ = document.createElement('object');
+                let obj = element.__resizeTrigger__ = document.createElement('object');
                 obj.setAttribute('style', 'display: block; position: absolute; top: 0; left: 0; height: 100%; width: 100%; overflow: hidden; pointer-events: none; z-index: -1;');
                 obj.__resizeElement__ = element;
                 obj.onload = objectLoad;
@@ -84,11 +84,11 @@ function _init(_parent) {
     elem.style.width = '100%';
     elem.id = 'trussLayoutContainer';
 
-    layout.addEvent(elem, function(e){
+    layout.addEvent(elem, function (e) {
         let newHeight = e.target.innerHeight,
             newWidth = e.target.innerWidth;
-        
-        instance.resizeLayout(-1 * (conf.height-newHeight), -1 * (conf.width - newWidth));
+
+        instance.resizeLayout(-1 * (conf.height - newHeight), -1 * (conf.width - newWidth));
         conf.height = newHeight;
         conf.width = newWidth;
     });
@@ -105,4 +105,3 @@ function _init(_parent) {
 export {
     _init as init
 };
-
