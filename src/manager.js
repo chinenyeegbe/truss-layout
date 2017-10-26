@@ -1,8 +1,7 @@
 import Grid from './grid.js';
 import {
 	_createElement,
-	_addStyle,
-	roundUp
+	_addStyle
 } from './utils';
 
 class TrussLayout {
@@ -23,19 +22,23 @@ class TrussLayout {
 	resizeLayout(heightChange, widthChange) {
 		let rows = this.gridCount.rows,
 			cols = this.gridCount.columns,
-			ch = roundUp(heightChange / rows),
-			cw = roundUp(widthChange / cols),
+			ch = (heightChange / rows),
+			cw = (widthChange / cols),
 			list = this.gridList,
-			conf = this.gridCount;
-
+			conf = this.gridCount,
+			vertical = 0;
+			
+		// iterating through all the sliders
 		for (let i = 0, ii = this.slider.length; i < ii; i++) {
 			let _slider = this.slider[i],
 				isVertical = _slider.isVertical,
 				elem = _slider.slider;
 
 			if (isVertical) {
-				let ic = (Math.abs(conf['columns'] - 2 - Number(i)) + 1),
-					left = cw * ic;
+				vertical++;
+				let //ic = (Math.abs(conf['columns'] - 2 - Number(i)) + 1),
+					left = cw * vertical;
+
 				left = (parseFloat(elem.style.left) + left);
 				// logic for changinf the left position
 				elem.style.left = left + 'px';
@@ -388,6 +391,7 @@ class TrussLayout {
 				config.height = `${sliderHeight}px`;
 				config.width = `${sliderWidth}px`;
 				config.background = '#faebd7';
+				//config.transition = 'all ease 0.2s';
 
 				let elem = _createElement('div'),
 					id = `${i}`,

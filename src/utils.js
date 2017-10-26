@@ -31,9 +31,15 @@ function roundUp (d) {
    return Math.round(d * 100) / 100;
 }
 
+function roundUpNearest(num, precision) {
+	!precision && (precision = 100);
+	return Math.ceil(num * precision) / precision;
+}
+
 export {
 	getRandomColor,
 	_addStyle,
 	_createElement,
-	roundUp
+	roundUp,
+	roundUpNearest
 };

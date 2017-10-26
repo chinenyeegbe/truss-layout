@@ -5,7 +5,7 @@ let layout = (function () {
         requestFrame = (function () {
             let raf = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame ||
                 function (fn) {
-                    return window.setTimeout(fn, 60);
+                    return window.setTimeout(fn, 20);
                 };
             return function (fn) {
                 return raf(fn);
@@ -81,14 +81,16 @@ function _init(_parent) {
         conf = {};
 
     elem.style.height = '100%';
-    elem.style.width = '100%';
+    elem.style.width = '100.00%';
     elem.id = 'trussLayoutContainer';
 
     layout.addEvent(elem, function (e) {
         let newHeight = e.target.innerHeight,
-            newWidth = e.target.innerWidth;
+            newWidth = e.target.innerWidth,
+            ch = (conf.height - newHeight),
+            cw = (conf.width - newWidth);
 
-        instance.resizeLayout(-1 * (conf.height - newHeight), -1 * (conf.width - newWidth));
+        instance.resizeLayout(ch ? (-1 * ch) : 0, cw ? (-1 * cw) : 0);
         conf.height = newHeight;
         conf.width = newWidth;
     });
