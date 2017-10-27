@@ -1,131 +1,170 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-	<title>Truss Layout</title>
-	<script type="text/javascript" src="../truss.js"></script>
+    <title>Truss Layout</title>
+    <script type="text/javascript" src="../truss.js"></script>
 
-	<style type="text/css" media="screen">
-		* {
-		  outline: none;
-		  overflow: hidden;
-		  height: 100%;
-		  width: 100%;
-		  padding: 0;
-		  margin: 0;
-		}
+    <style type="text/css" media="screen">
+        * {
+            outline: none;
+            overflow: hidden;
+            height: 600px;
+            width: 1000px;
+            padding: 0;
+            margin: 0;
+            user-select: none;
+        }
 
-		.button {
-		  font-size: 15px;
-		  font-family: 'tahoma','Pacifico';
-		  border-radius: 3px;
-		  background-color: #ECFBFF;
-		  border: 2px solid #A6E0EE;
-		  color: #2D7586;
-		  display: block;
-		  cursor: pointer;
-		  text-align: center;
-		  text-decoration : none;
-		  width: 100px;
-		  height:20px;
-		  padding: 5px 10px;
-		  margin: 14px 5px;
-		  box-shadow: 0 0 2px 2px rgba(244,244,244,0.3);
-		}
+        .button {
+            font-size: 15px;
+            font-family: 'tahoma', 'Pacifico';
+            border-radius: 3px;
+            background-color: #ECFBFF;
+            border: 2px solid #A6E0EE;
+            color: #2D7586;
+            display: block;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            width: 100px;
+            height: 20px;
+            padding: 5px 10px;
+            margin: 14px 5px;
+            box-shadow: 0 0 2px 2px rgba(244, 244, 244, 0.3);
+        }
 
-		.button:hover {
-		  background-color: #DDF7FF;
-		  border: 2px solid rgba(15, 102, 137, 0.8);
-		}
+        .button:hover {
+            background-color: #DDF7FF;
+            border: 2px solid rgba(15, 102, 137, 0.8);
+        }
 
-		.button-container {
-		  position: absolute;
-		  top:0;
-		  left:0;
-		  height: 60px;
-		  width: 100%;
-		  border-bottom: 2px solid rgba(0,0,0,0.3);
-		  background-color: rgba(15, 102, 137, 0.8);
-		}
+        .button-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 60px;
+            width: 100%;
+            border-bottom: 2px solid rgba(0, 0, 0, 0.3);
+            background-color: rgba(15, 102, 137, 0.8);
+        }
 
-		.board {
-		  position: relative;
-		  top: 100px;
-		  left: 0px;
-		  width: 80%;
-		  margin: 0px auto;
-		  height: 80%;
-		  box-shadow: 0 0 15px 2px rgba(0,0,0,0.4);
-		  display: block;
-		}
-	</style>	
+        .board {
+            position: relative;
+            top: 100px;
+            left: 0px;
+            width: 80%;
+            margin: 0px auto;
+            height: 80%;
+            box-shadow: 0 0 15px 2px rgba(0, 0, 0, 0.4);
+            display: block;
+        }
+
+        .resizable {
+            background: cyan;
+            position: relative;
+        }
+
+        .resizer {
+            width: 5px;
+            height: 5px;
+            background: blue;
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            cursor: se-resize;
+        }
+    </style>
 </head>
+
 <body>
-	<div class="container">
-		<div class="button-container">
-		</div>
-		<div class="board" id="board"></div>
-	</div>
+    <div class="container">
+        <div class="button-container"></div>
+        <div class="board" id="board"></div>
+    </div>
 </body>
 <script type="text/javascript">
-	let elem = document.getElementById('board'),
-        grids = new truss.init(elem),
-        svgElem = `<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+    let elem = document.getElementById('board'),
+        grids = new truss.init({
+            container: elem,
+            background: '#ccc',
+            enableContainerDrag: false
+        }),
+        svgElem =
+        `<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
             viewBox="0 0 15 15" style="enable-background:new 0 0 15 15;" xml:space="preserve">
             <path id="ARROW" d="M7.5,0.5c3.9,0,7,3.1,7,7c0,3.9-3.1,7-7,7c-3.9,0-7-3.1-7-7l0,0C0.5,3.6,3.6,0.5,7.5,0.5 C7.5,0.5,7.5,0.5,7.5,0.5L7.5,0.5L7.5,0.5z M6.1,4.7v5.6l4.2-2.8L6.1,4.7z"/>
             </svg>`;
 
-	grids.createSplit([2,3], function () {
-		let allGrids = this.gridList,
-			secondLayout = allGrids[1],
-			thirdLayout = allGrids[2];
+    grids.createSplit([3, 3], function () {
+        let allGrids = this.gridList,
+            secondLayout = allGrids[1],
+            thirdLayout = allGrids[2];
 
-		secondLayout.createSplit([3,4], function () {
-			this.gridList['3'].createSplit([3,1]);
-		});
+        secondLayout.createSplit([3, 4], function () {
+            this.gridList['3'].createSplit([3, 1]);
+        });
 
-		thirdLayout.addButton({type: 'svg', html: svgElem},{ position: 'tr', orientation: 'horizontal'});
-		thirdLayout.addButton('s',{ position: 'tl', orientation: 'horizontal'});
-		thirdLayout.addButton('s',{ position: 'tl', orientation: 'horizontal'});
-		thirdLayout.addButton('s',{ position: 'top-left', orientation: 'horizontal'});
-		thirdLayout.addButton('m',{ position: 'top-left', orientation: 'horizontal'});
-		thirdLayout.addButton('R',{ position: 'top-right', orientation: 'horizontal'});
-		thirdLayout.addButton('r',{ position: 'right-top', orientation: 'vertical'});
-		thirdLayout.addButton('S',{ position: 'top-left', orientation: 'vertical'});
-		thirdLayout.addButton('s',{ position: 'top-left', orientation: 'vertical'});
-		thirdLayout.addButton('s',{ position: 'bottom-left', orientation: 'vertical'});
-		thirdLayout.addButton('s',{ position: 'bottom-left', orientation: 'vertical'});
-		thirdLayout.addButton('s',{ position: 'bottom-right', orientation: 'vertical'});
-		thirdLayout.addButton('s',{ position: 'bottom-right', orientation: 'horizontal'});
+        thirdLayout.addButton({
+            type: 'svg',
+            html: svgElem
+        }, {
+            position: 'tr',
+            orientation: 'horizontal'
+        });
+        thirdLayout.addButton('s', {
+            position: 'tl',
+            orientation: 'horizontal'
+        });
+        thirdLayout.addButton('s', {
+            position: 'tl',
+            orientation: 'horizontal'
+        });
+        thirdLayout.addButton('s', {
+            position: 'top-left',
+            orientation: 'horizontal'
+        });
+        thirdLayout.addButton('m', {
+            position: 'top-left',
+            orientation: 'horizontal'
+        });
+        thirdLayout.addButton('R', {
+            position: 'top-right',
+            orientation: 'horizontal'
+        });
+        thirdLayout.addButton('r', {
+            position: 'right-top',
+            orientation: 'vertical'
+        });
+        thirdLayout.addButton('S', {
+            position: 'top-left',
+            orientation: 'vertical'
+        });
+        thirdLayout.addButton('s', {
+            position: 'top-left',
+            orientation: 'vertical'
+        });
+        thirdLayout.addButton('s', {
+            position: 'bottom-left',
+            orientation: 'vertical'
+        });
+        thirdLayout.addButton('s', {
+            position: 'bottom-left',
+            orientation: 'vertical'
+        });
+        thirdLayout.addButton('s', {
+            position: 'bottom-right',
+            orientation: 'vertical'
+        });
+        thirdLayout.addButton('s', {
+            position: 'bottom-right',
+            orientation: 'horizontal'
+        });
 
-		thirdLayout.getContainerId();
-		let con = allGrids[3].addContainer();
-	});
+        thirdLayout.getContainerId();
+        let con = allGrids[3].addContainer();
+    });
 
-	// grids.createGoldSplit('h', function () {
-	// 	// console.log();
-	// 	this.gridList[0].addButton('x',{ position: 'tr', orientation: 'horizontal'}, {
-	// 		name: 'click',
-	// 		callback: function () {
-	// 			console.log(this);
-	// 			this.remove();
-	// 		}
-	// 	});
-	// 	this.gridList[0].addButton('-',{ position: 'tr', orientation: 'horizontal'}, {
-	// 		name: 'click',
-	// 		callback: function () {
-	// 			alert('Minimize button clicked');
-	// 		}
-	// 	});
-	// 	this.gridList[0].addContainer();
-	// 	this.gridList[1].createGoldenSplit('v', function () {
-	// 		this.gridList[1].createGoldenSplit('h', function () {
-	// 			this.gridList[1].createSplit([3, 1], function () {
-	// 				for(let i in this.gridList) {
-	// 					this.gridList[i].createGoldenSplit();
-	// 				}
-	// 			});
-	// 		});
-	// 	});
-	// });
-	</script>
+</script>
+
 </html>

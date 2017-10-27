@@ -16,14 +16,22 @@ class Grid {
 
 	static defaultConfig() {
 		return {
-			background: '#adc8d6',
 			float: 'left',
 			position: 'relative'
 		};
 	}
 
 	_config() {
-		return Object.assign({}, Grid.defaultConfig(), this.dimensions);
+		return Object.assign({}, Grid.defaultConfig(), this.dimensions, {background: this.getConfiguration().background});
+	}
+
+	setConfigaration (conf) {
+		this.configuration = conf;
+		return this;
+	}
+
+	getConfiguration () {
+		return this.configuration;
 	}
 
 	setDimensions(_dim) {
@@ -51,7 +59,6 @@ class Grid {
 
 	_createDiv(id) {
 		let elem = document.createElement('div');
-
 		this.id = elem.id = id;
 		_addStyle(elem, this._config());
 
@@ -83,7 +90,7 @@ class Grid {
 			chartContainer = this.chartContainer = document.createElement('div'),
 			config = {
 				position: 'absolute',
-				background: '#ffffff'
+				background: this.getConfiguration().containerBackground
 			},
 			id = `${this.getId()}ChartContainer`,
 			parentElement = this.getNode(),
@@ -106,7 +113,7 @@ class Grid {
 		_addStyle(chartContainer, config);
 		parentElement.appendChild(chartContainer);
 
-		cb && cb.call(null, id);
+		cb && cb.call(null, this.chartContainer);
 
 		return chartContainer;
 	}
@@ -151,12 +158,16 @@ class Grid {
 
 	createSplit(split, cb) {
 		let splitLayout = this.splitLayout = new TrussLayout(this.node);
+		splitLayout.setConfigaration(this.getConfiguration());
+		this.root && (splitLayout.parentManager = this.root, splitLayout.index = this.index);
 		splitLayout.createSplit(split, cb);
 		return this;
 	}
 
 	createGoldenSplit(or, cb) {
 		let splitLayout = this.splitLayout = new TrussLayout(this.node);
+		splitLayout.setConfigaration(this.getConfiguration());
+		this.root && (splitLayout.parentManager = this.root, splitLayout.index = this.index);
 		splitLayout.createGoldSplit(or, cb);
 		return this;
 	}
@@ -167,7 +178,8 @@ class Grid {
 		}
 		let config = {
 				position: this._getButtonConfig(orientation),
-				content: this._parseContentConfig(contentConf)
+				content: this._parseContentConfig(contentConf),
+				configuration: this.getConfiguration()
 			},
 			id = `${this.getId()}Button${this.buttonCounter}`,
 			btnInstance = this.buttons[id] = new CircularButton(this.getNode(), config),
@@ -393,7 +405,7 @@ class Grid {
 			property = isVertical ? (isVerticalSlider ? 'left' : 'width') : (isVerticalSlider ? 'height' : 'top'),
 			actualAmount,
 			calculatedAmount;
-
+		
 		if(property === 'width') {
 			actualAmount =  amount * numberOfCells;
 		} else if (property === 'left') {
@@ -404,12 +416,24 @@ class Grid {
 		} else {
 			actualAmount = (Number(key) + 1) * amount;
 		}
+		// change the amount of positve and negetive value
+		if(isVerticalSlider === isVertical) {
+			if(sliderObj.dimensions) {
+				for(let i in sliderObj.dimensions) {
+					sliderObj.dimensions[i] += amount;
+				}
+			} else {
+				sliderObj.addMe += amount;
+			}
+		}
 		calculatedAmount = parseFloat(node.style[property]) + (op ? actualAmount : (actualAmount * -1));
 		
 		property === 'left' && sliderObj.currX && (sliderObj.currX = calculatedAmount);
 		property === 'top' && sliderObj.currY && (sliderObj.currY = calculatedAmount);
 		
 		node.style[property] = calculatedAmount + 'px';
+
+		return this;
 	}
 }
 

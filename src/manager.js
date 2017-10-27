@@ -1,8 +1,7 @@
 import Grid from './grid.js';
 import {
 	_createElement,
-	_addStyle,
-	roundUp
+	_addStyle
 } from './utils';
 
 class TrussLayout {
@@ -10,10 +9,7 @@ class TrussLayout {
 		this.gridList = {};
 		this.elementCounter = 0;
 		this.parent = elem;
-		this.gridCount = {
-			horizontal: 0,
-			vertical: 0
-		};
+		this.gridCount = {};
 	}
 
 	config() {
@@ -23,22 +19,35 @@ class TrussLayout {
 		};
 	}
 
-	resizeLayout (heightChange, widthChange) {
+	setConfigaration (conf) {
+		this.configuration = conf;
+		return this;
+	}
+
+	getConfiguration () {
+		return this.configuration;
+	}
+
+	resizeLayout(heightChange, widthChange) {
 		let rows = this.gridCount.rows,
 			cols = this.gridCount.columns,
-			ch = roundUp(heightChange / rows),
-			cw = roundUp(widthChange / cols),
+			ch = (heightChange / rows),
+			cw = (widthChange / cols),
 			list = this.gridList,
-			conf = this.gridCount;
+			conf = this.gridCount,
+			vertical = 0;
 
+		// iterating through all the sliders
 		for (let i = 0, ii = this.slider.length; i < ii; i++) {
 			let _slider = this.slider[i],
 				isVertical = _slider.isVertical,
 				elem = _slider.slider;
-			
+
 			if (isVertical) {
-				let ic = (Math.abs(conf['columns'] - 2 - Number(i)) + 1),
-					left = cw * ic;
+				vertical++;
+				let //ic = (Math.abs(conf['columns'] - 2 - Number(i)) + 1),
+					left = cw * vertical;
+
 				left = (parseFloat(elem.style.left) + left);
 				// logic for changinf the left position
 				elem.style.left = left + 'px';
@@ -47,23 +56,23 @@ class TrussLayout {
 				// changing slider current position
 				_slider.currX && (_slider.currX = left);
 			} else {
-				let numberOfCells = isVertical ? conf['rows']: conf['columns'];
+				let numberOfCells = isVertical ? conf['rows'] : conf['columns'];
 				// logic for changing the top
-				let top =  ch + ch * i;
+				let top = ch + ch * i;
 				top = (parseFloat(elem.style.top) + top);
 				elem.style.top = top + 'px';
 				// changing the current top position of the slider
 				_slider.currY && (_slider.currY = top);
 				// LOGIC for changing the width
-				let width =  cw * numberOfCells;
+				let width = cw * numberOfCells;
 				elem.style.width = (parseFloat(elem.style.width) + width) + 'px';
 			}
 		}
-		
-		for(let i in list) {
+
+		for (let i in list) {
 			let node = list[i].getNode(),
 				layout = list[i].splitLayout;
-			
+
 			node.style.height = (parseFloat(node.style.height) + ch) + 'px';
 			node.style.width = (parseFloat(node.style.width) + cw) + 'px';
 			list[i].resizeContainer();
@@ -77,6 +86,67 @@ class TrussLayout {
 		}
 		this.elementList = {};
 		this.elementCounter = 0;
+	}
+	/**
+	 * set child node property that defines the amount that the grids can be shifted. This function also
+	 * stores the configuration to its parent manager (root node).
+	 * @param {Number} h - height of the grids
+	 * @param {Number} w - width of the grids
+	 * @param {Number} r - number of rows
+	 * @param {Number} c - number of columns
+	 */
+	setDraggableDimension(h, w, r, c) {
+		let parentManager = this.parentManager,
+			gridConf = this.gridConf = {
+				hMax: h / 2,
+				hSum: (h / 2) * r,
+				wMax: w / 2,
+				wSum: (w / 2) * c
+			};
+		if (parentManager) {
+			parentManager.gridConfCollection || (parentManager.gridConfCollection = {});
+			parentManager.gridConfCollection[this.index] = gridConf;
+		}
+	}
+
+	getMinimunDraggableDimension() {
+		let parentConf = this.gridConf,
+			collection = this.gridConfCollection,
+			gridCount = this.gridCount,
+			list = this.gridList,
+			move = {
+				x: Infinity,
+				y: Infinity
+			};
+
+		if (collection) {
+			let boundings;
+			for (let item in collection) {
+				boundings = list[item].splitLayout && list[item].splitLayout.getMinimunDraggableDimension();
+				move.x > boundings.x && (move.x = boundings.x);
+				move.y > boundings.y && (move.y = boundings.y);
+			}
+		} else {
+			let rows = gridCount.rows,
+				cols = gridCount.columns;
+			if (rows > 1 && cols === 1) {
+				return {
+					x: parentConf.wMax,
+					y: parentConf.hSum
+				};
+			} else if (rows === 1 && cols > 1) {
+				return {
+					x: parentConf.wSum,
+					y: parentConf.hMax
+				};
+			} else {
+				return {
+					x: parentConf.wSum,
+					y: parentConf.hSum
+				};
+			}
+		}
+		return move;
 	}
 
 	createSplit(splits, cb) {
@@ -100,12 +170,17 @@ class TrussLayout {
 				padding: `${padding}px`
 			};
 
+		this.setDraggableDimension(calculatedHeight, calculatedWidth, rows, columns);
+
 		for (let i = 0; i < numberOfDivs; i++) {
 			let grid = new Grid(parentElem),
 				id = (parentElem.id || 'gridLayout') + this.elementCounter++;
+			
+			grid.setConfigaration(this.getConfiguration());
 			grid.setDimensions(config)._createDiv(id)._calculateMaxButton();
+			grid.root = this;
+			grid.index = this.elementCounter - 1;
 
-			this.gridCount['horizontal']++;
 			this.gridList[this.elementCounter - 1] = grid;
 		}
 
@@ -142,25 +217,24 @@ class TrussLayout {
 			columns: columns
 		};
 
+		this.childConf = {
+			hMax: parentHeight / 2,
+			hSum: parentHeight / 2,
+			wMax: parentHeight / 2,
+			wSum: parentWidth / 2
+		};
+		this.setDraggableDimension(parentHeight/2, parentWidth/2, rows, columns);
 		for (let i = 0; i < 2; i++) {
-			let h,
-				w;
-			h = config.height = `${Array.isArray(calculatedHeight) ? (calculatedHeight[i] - (margin * 2.1)) : calculatedHeight}px`;
-			w = config.width = `${Array.isArray(calculatedWidth) ? (calculatedWidth[i] - (margin * 2.1)) : calculatedWidth}px`;
+			config.height = `${Array.isArray(calculatedHeight) ? (calculatedHeight[i] - (margin * 2.1)) : calculatedHeight}px`;
+			config.width = `${Array.isArray(calculatedWidth) ? (calculatedWidth[i] - (margin * 2.1)) : calculatedWidth}px`;
 
 			let grid = new Grid(parentElem),
 				id = (parentElem.id || 'gridLayout') + this.elementCounter++;
+			
+			grid.setConfigaration(this.getConfiguration());
 			grid.setDimensions(config)._createDiv(id)._calculateMaxButton();
-			grid._setBoundingClintDimension({
-				height: parseInt(h),
-				width: parseInt(w),
-				parentHeight: parentHeight,
-				parentWidth: parentWidth,
-				rows: rows,
-				columns: columns
-			})._setOrientation(or);
-
-			this.gridCount[(or ? 'horizontal' : 'vertical')]++;
+			grid.root = this;
+			grid.index = this.elementCounter - 1;
 			this.gridList[this.elementCounter - 1] = grid;
 		}
 
@@ -180,7 +254,8 @@ class TrussLayout {
 			config = {
 				position: 'absolute'
 			},
-			margin = 5;
+			margin = 5,
+			_conf = this.getConfiguration();
 
 		if (r > 1) { // for r = 3 there will be (3-1) horizontal sliders
 			let sliderHeight = margin * 2,
@@ -194,7 +269,7 @@ class TrussLayout {
 				config.left = `${margin}px`;
 				config.height = `${sliderHeight}px`;
 				config.width = `${sliderWidth}px`;
-				config.background = '#faebd7';
+				config.background = _conf.sliderBackground;
 				config.zIndex = 10;
 
 				let elem = _createElement('div'),
@@ -208,19 +283,20 @@ class TrussLayout {
 					y: 0,
 					currY: top,
 					newY: 0,
-					isSelected: false
+					isSelected: false,
+					addMe: 0
 				});
 				elem.id = this.parent.id + id;
 
 				let sliderProps = slider[len];
 
 				elem.addEventListener('mouseover', function () {
-					this.style.background = '#dbc28c';
+					this.style.background = _conf.sliderHoverColor;
 					this.style.cursor = 'ns-resize';
 					this.style.zIndex = parseInt(this.style.zIndex) + 1;
 				});
 				elem.addEventListener('mouseout', function () {
-					!sliderProps.isSelected && (this.style.background = '#faebd7');
+					!sliderProps.isSelected && (this.style.background = _conf.sliderBackground);
 				});
 				elem.addEventListener('mousedown', function (e) {
 					sliderProps.isSelected = true;
@@ -228,8 +304,79 @@ class TrussLayout {
 				});
 				elem.addEventListener('mouseup', function () {
 					sliderProps.isSelected = false;
-					self._resize((sliderProps.currY - sliderProps.newY), i, false);
-					sliderProps.currY = sliderProps.newY;
+					if (sliderProps.newY) {
+						// if newx is greater the zero
+						let change = (sliderProps.currY - sliderProps.newY),
+							prevSlider = slider[len - 1],
+							nextSlider = slider[len + 1],
+							addme = sliderProps.addMe * 2;
+
+						if(!sliderProps.dimensions) {
+							let dim = sliderProps.dimensions = {},
+								props1 = sliderProps.dependencies = self._resize(i, false);
+
+							dim.y1 = (props1[2].y === Infinity ? (self.gridConf.hMax) : (props1[2].y)) - addme;
+							dim.y2 = (props1[3].y === Infinity ? (self.gridConf.hMax) : (props1[3].y)) - addme;
+						}
+						// previous slider
+						if(slider[len - 1] && slider[len - 1].isVertical === false && !slider[len - 1].dimensions) {
+							let sliderProps = slider[len - 1],
+								dim = sliderProps.dimensions = {},
+								props1 = sliderProps.dependencies = self._resize(i-1, false);
+								
+							dim.y1 = (props1[2].y === Infinity ? (self.gridConf.hMax) : (props1[2].y)) - addme;
+							dim.y2 = (props1[3].y === Infinity ? (self.gridConf.hMax) : (props1[3].y)) - addme;
+						}
+						// next slider
+						if(slider[len + 1] && slider[len + 1].isVertical === false && !slider[len + 1].dimensions) {
+							let sliderProps = slider[len + 1],
+								dim = sliderProps.dimensions = {},
+								props1 = sliderProps.dependencies = self._resize(i+1, false);
+								
+							dim.y1 = (props1[2].y === Infinity ? (self.gridConf.hMax) : (props1[2].y)) - addme;
+							dim.y2 = (props1[3].y === Infinity ? (self.gridConf.hMax) : (props1[3].y)) - addme;
+						}
+
+						if (change > 0) {
+							if (change > sliderProps.dimensions.y1) {
+								change = sliderProps.dimensions.y1;
+								sliderProps.dimensions.y2 += sliderProps.dimensions.y1;
+								nextSlider && (nextSlider.isVertical === false) && (nextSlider.dimensions.y1 += sliderProps.dimensions.y1);
+								prevSlider && (prevSlider.isVertical === false) && (prevSlider.dimensions.y2 -= sliderProps.dimensions.y1);
+								// update slider position
+								sliderProps.newY = sliderProps.currY - sliderProps.dimensions.y1;
+								elem.style.top = sliderProps.newY + 'px';
+								sliderProps.dimensions.y1 = 0;
+							} else {
+								sliderProps.dimensions.y2 += change;
+								nextSlider && (nextSlider.isVertical === false) && (nextSlider.dimensions.y1 += change);
+								prevSlider && (prevSlider.isVertical === false) && (prevSlider.dimensions.y2 -= change);
+								sliderProps.dimensions.y1 -= change;
+							}
+						} else {
+							let _change = Math.abs(change);
+							if(_change > sliderProps.dimensions.y2) { // dont go down
+								_change = sliderProps.dimensions.y2;
+								sliderProps.dimensions.y1 += sliderProps.dimensions.y2;
+								nextSlider && (nextSlider.isVertical === false) && (nextSlider.dimensions.y1 -= sliderProps.dimensions.y2);
+								prevSlider && (prevSlider.isVertical === false) && (prevSlider.dimensions.y2 += sliderProps.dimensions.y2);
+								// update slider position
+								sliderProps.newY = sliderProps.currY + sliderProps.dimensions.y2;
+								elem.style.top = sliderProps.newY + 'px';
+								sliderProps.dimensions.y2 = 0;
+							} else { // change normally
+								sliderProps.dimensions.y2 -= _change;
+								nextSlider && (nextSlider.isVertical === false) && (nextSlider.dimensions.y1 -= _change);
+								prevSlider && (prevSlider.isVertical === false) && (prevSlider.dimensions.y2 += _change);
+								sliderProps.dimensions.y1 += _change;
+							}
+							change = -1 * _change;
+						}
+
+						self._excuteSliderChange(false, change, sliderProps.dependencies[0], sliderProps.dependencies[1]);
+						sliderProps.currY = sliderProps.newY;
+					}
+					
 				});
 				this.parent.addEventListener('mousemove', function (e) {
 					if (sliderProps.isSelected == true) {
@@ -257,8 +404,9 @@ class TrussLayout {
 				config.left = `${left}px`;
 				config.height = `${sliderHeight}px`;
 				config.width = `${sliderWidth}px`;
-				config.background = '#faebd7';
-				
+				config.background = _conf.sliderBackground;
+				//config.transition = 'all ease 0.2s';
+
 				let elem = _createElement('div'),
 					id = `${i}`,
 					len = slider.length,
@@ -272,17 +420,18 @@ class TrussLayout {
 					x: 0,
 					currX: left,
 					newX: 0,
-					isSelected: false
+					isSelected: false,
+					addMe: 0
 				});
 				sliderProps = slider[len];
 
-				elem.addEventListener('mouseover', function() {
-					this.style.background = '#dbc28c';
+				elem.addEventListener('mouseover', function () {
+					this.style.background = _conf.sliderHoverColor;
 					this.style.cursor = 'ew-resize';
 					this.style.zIndex += 1;
 				});
 				elem.addEventListener('mouseout', function () {
-					!sliderProps.isSelected && (this.style.background = '#faebd7');
+					!sliderProps.isSelected && (this.style.background = _conf.sliderBackground);
 				});
 				elem.addEventListener('mousedown', function (e) {
 					sliderProps.isSelected = true;
@@ -290,8 +439,78 @@ class TrussLayout {
 				});
 				elem.addEventListener('mouseup', function () {
 					sliderProps.isSelected = false;
-					sliderProps.newX && self._resize((sliderProps.currX - sliderProps.newX), i, true);
-					sliderProps.currX = sliderProps.newX;
+					if (sliderProps.newX) {
+						let change = (sliderProps.currX - sliderProps.newX),
+							prevSlider = slider[len - 1],
+							nextSlider = slider[len + 1],
+							addme = sliderProps.addMe * 2;
+
+						if(!sliderProps.dimensions) {
+							let dim = sliderProps.dimensions = {},
+								props1 = sliderProps.dependencies = self._resize(i, true);
+							
+							dim.x1 = (props1[2].x === Infinity ? (self.gridConf.wMax) : (props1[2].x)) - addme;
+							dim.x2 = (props1[3].x === Infinity ? (self.gridConf.wMax) : (props1[3].x)) - addme;
+						}
+						// previous slider
+						if(slider[len - 1] && slider[len - 1].isVertical === true && !slider[len - 1].dimensions) {
+							let sliderProps = slider[len - 1],
+								dim = sliderProps.dimensions = {},
+								props1 = sliderProps.dependencies = self._resize(i-1, true);
+								
+							dim.x1 = (props1[2].x === Infinity ? (self.gridConf.wMax) : (props1[2].x)) - addme;
+							dim.x2 = (props1[3].x === Infinity ? (self.gridConf.wMax) : (props1[3].x)) - addme;
+						}
+						// next slider
+						if(slider[len + 1] && slider[len + 1].isVertical === true && !slider[len + 1].dimensions) {
+							let sliderProps = slider[len + 1],
+								dim = sliderProps.dimensions = {},
+								props1 = sliderProps.dependencies = self._resize(i+1, true);
+								
+							dim.x1 = (props1[2].x === Infinity ? (self.gridConf.wMax) : (props1[2].x)) - addme;
+							dim.x2 = (props1[3].x === Infinity ? (self.gridConf.wMax) : (props1[3].x)) - addme;
+						}
+
+						if(change > 0) { // moving left
+							if(change > sliderProps.dimensions.x1) {
+								change = sliderProps.dimensions.x1;
+								sliderProps.dimensions.x2 += sliderProps.dimensions.x1;
+								nextSlider && (nextSlider.isVertical === true) && (nextSlider.dimensions.x1 += sliderProps.dimensions.x1);
+								prevSlider && (prevSlider.isVertical === true) && (prevSlider.dimensions.x2 -= sliderProps.dimensions.x1);
+								// update slider position
+								sliderProps.newX = sliderProps.currX - sliderProps.dimensions.x1;
+								elem.style.left = sliderProps.newX + 'px';
+								sliderProps.dimensions.x1 = 0;
+							} else {
+								sliderProps.dimensions.x2 += change;
+								nextSlider && (nextSlider.isVertical === true) && (nextSlider.dimensions.x1 += change);
+								prevSlider && (prevSlider.isVertical === true) && (prevSlider.dimensions.x2 -= change);
+								sliderProps.dimensions.x1 -= change;
+							}
+						} else { // moving right
+							
+							let _change = Math.abs(change);
+							if(_change > sliderProps.dimensions.x2) { // dont go down
+								_change = sliderProps.dimensions.x2;
+								sliderProps.dimensions.x1 += sliderProps.dimensions.x2;
+								nextSlider && (nextSlider.isVertical === true) && (nextSlider.dimensions.x1 -= sliderProps.dimensions.x2);
+								prevSlider && (prevSlider.isVertical === true) && (prevSlider.dimensions.x2 += sliderProps.dimensions.x2);
+								// update slider position
+								sliderProps.newX = sliderProps.currX + sliderProps.dimensions.x2;
+								elem.style.left = sliderProps.newX + 'px';
+								sliderProps.dimensions.x2 = 0;
+							} else { // change normally
+								sliderProps.dimensions.x2 -= _change;
+								nextSlider && (nextSlider.isVertical === true) && (nextSlider.dimensions.x1 -= _change);
+								prevSlider && (prevSlider.isVertical === true) && (prevSlider.dimensions.x2 += _change);
+								sliderProps.dimensions.x1 += _change;
+							}
+							change = -1 * _change;
+						}
+						self._excuteSliderChange(true, change, sliderProps.dependencies[0], sliderProps.dependencies[1]);
+						// change current position of x
+						sliderProps.currX = sliderProps.newX;
+					}
 				});
 				self.parent.addEventListener('mousemove', function (e) {
 					if (sliderProps.isSelected == true) {
@@ -305,47 +524,83 @@ class TrussLayout {
 		}
 		return slider;
 	}
-
-	_resize(change, i, isVertical) {
+	/**
+	 * 
+	 * @param {number} i - index of the slider 
+	 * @param {Boolean} isVertical - The slider is vertical or not
+	 */
+	_resize(i, isVertical) {
 		let gridCount = this.gridCount,
 			list = this.gridList,
 			count = 0,
-			c = 0;
-		
-		if(isVertical) {
-			count =  gridCount['rows'];
+			c = 0,
+			side1 = [],
+			side2 = [],
+			boundings,
+			movePos = {
+				x: Infinity,
+				y: Infinity
+			},
+			moveNeg = {
+				x: Infinity,
+				y: Infinity
+			};
+
+		if (isVertical) {
+			count = gridCount['rows'];
 			c = gridCount['columns'];
 		} else {
-			c =  gridCount['rows'];
+			c = gridCount['rows'];
 			count = gridCount['columns'];
 		}
 
-		for(let j = 0; j < count; j++) {
+		for (let j = 0; j < count; j++) {
 			let k1,
-				k2,
-				item1,
-				item2;
+				k2;
 
-			if(count > 1 && !isVertical) {
+			if (count > 1 && !isVertical) {
 				let startingPoint = count * (i - 1);
 				k1 = startingPoint + j;
 				k2 = startingPoint + j + count;
 			} else {
-				k2 = (i + (j * c)),
+				k2 = (i + (j * c));
 				k1 = k2 - 1;
 			}
-			
-			item1 = list[k1],
-			item2 = list[k2];
 
-			if (isVertical) { //move left
-				item1.resizeInnerContainers(isVertical, change, 0); // change 
-				item2.resizeInnerContainers(isVertical, change, 1);
-			} else {
-				item1.resizeInnerContainers(isVertical, change, 0);
-				item2.resizeInnerContainers(isVertical, change, 1);
-			}
-		}		
+			side1.push(list[k1]);
+			side2.push(list[k2]);
+		}
+		// if change is negetive select side2
+		// check the measurement for both sides negetive and positive	
+		side1.forEach(i => {
+			boundings = i.splitLayout && i.splitLayout.getMinimunDraggableDimension();
+			boundings && movePos.x > boundings.x && (movePos.x = boundings.x);
+			boundings && movePos.y > boundings.y && (movePos.y = boundings.y);
+		});
+		side2.forEach(i => {
+			boundings = i.splitLayout && i.splitLayout.getMinimunDraggableDimension();
+			boundings && moveNeg.x > boundings.x && (moveNeg.x = boundings.x);
+			boundings && moveNeg.y > boundings.y && (moveNeg.y = boundings.y);
+		});
+
+		return [side1, side2, movePos, moveNeg];
+	}
+	/**
+	 * 
+	 * @param {Boolean} isVertical - Slider is vertical or not
+	 * @param {Number} change - the amount of change
+	 * @param {Array} s1 - side 1
+	 * @param {Array} s2 - side 2
+	 */
+	_excuteSliderChange(isVertical, change, s1, s2) {
+		s1.forEach(i => {
+			i.resizeInnerContainers(isVertical, change, 0);
+		});
+		s2.forEach(i => {
+			i.resizeInnerContainers(isVertical, change, 1);
+		});
+
+		return this;
 	}
 }
 

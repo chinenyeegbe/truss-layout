@@ -74,32 +74,94 @@ let layout = (function () {
     };
 })();
 // export  TrussLayout;
-function _init(_parent) {
-    !_parent && (_parent = document.getElementsByTagName('body')[0]);
+function _init(_conf) {
     let elem = document.createElement('div'),
         instance,
-        conf = {};
-
+        conf = {},
+        configuration = parseConfig(_conf || {}),
+        _parent = configuration.container;
+    // set element height and width
     elem.style.height = '100%';
     elem.style.width = '100%';
     elem.id = 'trussLayoutContainer';
 
-    layout.addEvent(elem, function(e){
-        let newHeight = e.target.innerHeight,
-            newWidth = e.target.innerWidth;
-        
-        instance.resizeLayout(-1 * (conf.height-newHeight), -1 * (conf.width - newWidth));
-        conf.height = newHeight;
-        conf.width = newWidth;
-    });
+    if (configuration.enableContainerDrag) {
+        let startX, 
+            startY, 
+            startWidth, 
+            startHeight,
+            initDrag = (e) =>{
+                startX = e.clientX;
+                startY = e.clientY;
+                startWidth = parseInt(document.defaultView.getComputedStyle(elem).width, 10);
+                startHeight = parseInt(document.defaultView.getComputedStyle(elem).height, 10);
+                document.documentElement.addEventListener('mousemove', doDrag, false);
+                document.documentElement.addEventListener('mouseup', stopDrag, false);
+            },
+            doDrag = (e) => {
+                elem.style.width = (startWidth + e.clientX - startX) + 'px';
+                elem.style.height = (startHeight + e.clientY - startY) + 'px';
+            },
+            stopDrag = () => {
+                document.documentElement.removeEventListener('mousemove', doDrag, false);
+                document.documentElement.removeEventListener('mouseup', stopDrag, false);
+            };
+
+        elem.addEventListener('click', function init() {
+            elem.removeEventListener('click', init, false);
+            elem.className = elem.className + ' resizable';
+            let resizer = document.createElement('div');
+            resizer.className = 'resizer';
+            elem.appendChild(resizer);
+            resizer.addEventListener('mousedown', initDrag, false);
+        }, false);
+
+        layout.addEvent(elem, function (e) {
+            let newHeight = e.target.innerHeight,
+                newWidth = e.target.innerWidth,
+                ch = (conf.height - newHeight),
+                cw = (conf.width - newWidth);
+    
+            instance.resizeLayout(ch ? (-1 * ch) : 0, cw ? (-1 * cw) : 0);
+            conf.height = newHeight;
+            conf.width = newWidth;
+        });
+    }
 
     _parent.appendChild(elem);
+    // creating instance of truss layout
     instance = new TrussLayout(elem);
+    instance.setConfigaration(configuration);
 
     conf.height = elem.offsetHeight;
     conf.width = elem.offsetWidth;
 
     return instance;
+}
+
+function parseConfig (conf) {
+    let config = {
+            background : '#ccc',
+            containerBackground : '#fff',
+            sliderBackground : '#F2F2F2',
+            sliderHoverColor: '#d7dcea',
+            buttonTextColor: '#fff',
+            buttonBackgroung: '#4679BD',
+            container : document.getElementsByTagName('body')[0],
+            enableContainerDrag: true
+        },
+        temp = {};
+
+    // user config merged with the default config
+    for(let i in config) {
+        if(conf.hasOwnProperty(i)) {
+            temp[i] = conf[i];
+        } else {
+            temp[i] = config[i];
+        }
+    }  
+
+    return temp;
 }
 
 export {

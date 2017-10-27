@@ -25,8 +25,6 @@ class CircularButton {
 				paddingBottom: '100%',
 				borderRadius: '50%',
 				overflow: 'hidden',
-				background: '#4679BD',
-				boxShadow: '0 0 3px gray',
 				cursor: 'pointer'
 			},
 			'a': {
@@ -71,6 +69,10 @@ class CircularButton {
 		
 		_addStyle(outer, config['round-button']);
 		_addStyle(middle, config['round-button-circle']);
+		_addStyle(middle, {
+			background: this.config.configuration.buttonBackgroung,
+			color: this.config.configuration.buttonTextColor,
+		});
 		_addStyle(inner, config[conf.type]); //@todo change it as given type
 
 		switch (conf.type) {
