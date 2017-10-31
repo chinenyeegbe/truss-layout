@@ -9,8 +9,8 @@
         * {
             outline: none;
             overflow: hidden;
-            height: 600px;
-            width: 1000px;
+            height: 100%;/*600px;*/
+            width: 100%;
             padding: 0;
             margin: 0;
             user-select: none;
@@ -59,21 +59,6 @@
             box-shadow: 0 0 15px 2px rgba(0, 0, 0, 0.4);
             display: block;
         }
-
-        .resizable {
-            background: cyan;
-            position: relative;
-        }
-
-        .resizer {
-            width: 5px;
-            height: 5px;
-            background: blue;
-            position: absolute;
-            right: 0;
-            bottom: 0;
-            cursor: se-resize;
-        }
     </style>
 </head>
 
@@ -88,7 +73,7 @@
         grids = new truss.init({
             container: elem,
             background: '#ccc',
-            enableContainerDrag: false
+            enableContainerDrag: true
         }),
         svgElem =
         `<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
@@ -103,6 +88,19 @@
 
         secondLayout.createSplit([3, 4], function () {
             this.gridList['3'].createSplit([3, 1]);
+        });
+
+        allGrids[0].addButton('F', {
+            position: 'tr',
+            orientation: 'horizontal'
+        }, {
+            name: 'click',
+            callback: function () {
+                let l = this.facet(3),
+                    list = l.getAllGrids();
+                list[1].addContainer();
+                list[1].addButton('a');
+            }
         });
 
         thirdLayout.addButton({

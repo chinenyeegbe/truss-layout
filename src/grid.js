@@ -160,19 +160,25 @@ class Grid {
 		let splitLayout = this.splitLayout = new TrussLayout(this.node);
 		splitLayout.setConfigaration(this.getConfiguration());
 		this.root && (splitLayout.parentManager = this.root, splitLayout.index = this.index);
-		splitLayout.createSplit(split, cb);
-		return this;
+		
+		return splitLayout.createSplit(split, cb);
 	}
 
 	createGoldenSplit(or, cb) {
 		let splitLayout = this.splitLayout = new TrussLayout(this.node);
 		splitLayout.setConfigaration(this.getConfiguration());
 		this.root && (splitLayout.parentManager = this.root, splitLayout.index = this.index);
-		splitLayout.createGoldSplit(or, cb);
-		return this;
+		
+		return splitLayout.createGoldSplit(or, cb);
 	}
 
 	addButton(contentConf, orientation, events) {
+		if(!orientation) {
+			orientation = {
+				position: 'tl',
+				orientation: 'horizontal'
+			};
+		}
 		if (!this._canAddButton(orientation)) {
 			return this;
 		}
@@ -268,6 +274,32 @@ class Grid {
 		}
 
 		return posStr;
+	}
+
+	facet (n, orientation) {
+		orientation = (orientation && orientation.toLowerCase()[0]) || 'v';
+		let split = [];
+		if (Array.isArray(n)) {
+			split = n;
+		}
+		else if ((typeof n !== 'number' && parseInt(n) < 2) || n < 2) {
+			return this;
+		} else {
+			if(orientation === 'v') {
+				split[0] = 1;
+				split[1] = n;
+			} else {
+				split[0] = n;
+				split[1] = 1;
+			}
+		}
+		for(let i in this.buttons) {
+			this.getNode().removeChild(this.buttons[i].node);
+		}
+		this.getNode().removeChild(this.chartContainer);
+		this.chartContainer = null;
+		this.buttons = {};
+		return this.createSplit(split);
 	}
 
 	_getButtonConfig(or) {
@@ -372,6 +404,12 @@ class Grid {
 		// first change own dimension (width / height);
 		elem.style[property] = (operation ? (dataConf[property] + change) : (dataConf[property] - change)) + 'px';
 		this.resizeContainer();
+		
+		for (let key in sliders) {
+			if (sliders.hasOwnProperty(key)) {
+				this.changeSliderDimension(sliders[key], isvertical, amount, key, op, conf);
+			}
+		}
 
 		if (!childContainers) {
 			return this;
@@ -382,16 +420,6 @@ class Grid {
 		for (let key in childContainers) {
 			if (childContainers.hasOwnProperty(key)) {
 				childContainers[key].resizeInnerContainers(isvertical, amount, op);
-			}
-		}
-
-		if (!sliders) {
-			return this;
-		}
-		
-		for (let key in sliders) {
-			if (sliders.hasOwnProperty(key)) {
-				this.changeSliderDimension(sliders[key], isvertical, amount, key, op, conf);
 			}
 		}
 

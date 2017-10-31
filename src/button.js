@@ -25,7 +25,8 @@ class CircularButton {
 				paddingBottom: '100%',
 				borderRadius: '50%',
 				overflow: 'hidden',
-				cursor: 'pointer'
+				cursor: 'pointer',
+				marginLeft: '1%'
 			},
 			'a': {
 				display: 'block',

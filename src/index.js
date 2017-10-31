@@ -1,4 +1,6 @@
 import TrussLayout from './manager.js';
+import {_addStyle} from './utils.js';
+
 let layout = (function () {
     var attachEvent = document.attachEvent;
     var isIE = navigator.userAgent.match(/Trident/);
@@ -83,6 +85,8 @@ function _init(_conf) {
     // set element height and width
     elem.style.height = '100%';
     elem.style.width = '100%';
+    //elem.style.margin = '5px';
+    elem.style.position = 'relative';
     elem.id = 'trussLayoutContainer';
 
     if (configuration.enableContainerDrag) {
@@ -105,13 +109,25 @@ function _init(_conf) {
             stopDrag = () => {
                 document.documentElement.removeEventListener('mousemove', doDrag, false);
                 document.documentElement.removeEventListener('mouseup', stopDrag, false);
+            },
+            resizerStyle =  {
+                width: '7px',
+                height: '7px',
+                background: 'blue',
+                position: 'absolute',
+                right: '0',
+                bottom: '0',
+                borderRadius: '50% 0 0 0',
+                cursor: 'se-resize'
             };
 
         elem.addEventListener('click', function init() {
             elem.removeEventListener('click', init, false);
             elem.className = elem.className + ' resizable';
             let resizer = document.createElement('div');
-            resizer.className = 'resizer';
+            // resizer.className = 'resizer';
+            _addStyle(resizer, resizerStyle);
+
             elem.appendChild(resizer);
             resizer.addEventListener('mousedown', initDrag, false);
         }, false);

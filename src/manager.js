@@ -19,6 +19,10 @@ class TrussLayout {
 		};
 	}
 
+	getAllGrids () {
+		return this.gridList;
+	}
+
 	setConfigaration (conf) {
 		this.configuration = conf;
 		return this;
@@ -262,7 +266,7 @@ class TrussLayout {
 				sliderWidth = w - margin * 2;
 
 			for (let i = 1; i < r; i++) {
-				let startHeight = (Array.isArray(ch) ? ch[i - 1] - margin : (ch + margin - (margin / 2 * (i - 1)))),
+				let startHeight = (Array.isArray(ch) ? ch[i - 1] - margin : (ch + margin - (margin/i)*(i-1))),
 					top = ((startHeight * i) + (sliderHeight * (i - 1)));
 
 				config.top = `${top}px`;
